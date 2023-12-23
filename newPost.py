@@ -14,6 +14,57 @@ def play_success_sound():
     sound_file_path = 'C://Users//jerem//OneDrive//Desktop//WP//resources//sounds//success-1-6297.wav'
     winsound.PlaySound(sound_file_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
 
+def get_wordpress_categories():
+    # Your WordPress website URL
+    wordpress_url = 'https://thetechnicianstoolchest.com'
+    
+    # REST API endpoint for retrieving categories
+    categories_endpoint = wordpress_url + '/wp-json/wp/v2/categories'
+    
+    # Send the GET request
+    response = requests.get(categories_endpoint)
+    
+    # Check if the request was successful
+    if response.status_code == 200:
+        # Parse the JSON response
+        categories = response.json()
+        return categories
+    else:
+        print(f'Failed to retrieve categories. Status code: {response.status_code}')
+        return None
+
+def select_relevant_categories(post_content):
+    # Retrieve all categories
+    categories = get_wordpress_categories()
+    if not categories:
+        print('No categories retrieved from WordPress.')
+        return []
+
+    # Prepare a prompt for OpenAI API
+    category_names = [cat['name'] for cat in categories]
+    prompt = f"Given the blog post content: '{post_content}', which of the following categories is most relevant? " + ", ".join(category_names)
+
+    # Send the prompt to the OpenAI API
+    response = get_openai_response(prompt)
+
+    # Debug: Print the response from OpenAI API
+    print('Response from OpenAI API:', response)
+
+    # Parse the response to extract the selected categories
+    relevant_categories = response.split(', ')
+    
+    # Debug: Print the relevant categories
+    print('Relevant categories:', relevant_categories)
+
+    # Find the IDs of the relevant categories
+    relevant_category_ids = [cat['id'] for cat in categories if cat['name'] in relevant_categories]
+    relevant_category_ids = [cat['id'] for cat in categories if cat['name'] in relevant_categories]
+    
+    # Debug: Print the relevant category IDs
+    print('Relevant category IDs:', relevant_category_ids)
+
+    return relevant_category_ids
+
 def create_draft_post(content, loading_label):
     # Update the loading label
     loading_label.config(text='Generating title... Please wait.')
@@ -46,7 +97,8 @@ def create_draft_post(content, loading_label):
     post_data = {
         'title': post_title,
         'content': post_content,
-        'status': 'draft'  # Set to 'draft' to create a draft post
+        'status': 'draft',  # Set to 'draft' to create a draft post
+        'categories': select_relevant_categories(post_content)  # Add relevant categories
     }
 
     # Your username and application password from .env
@@ -113,9 +165,43 @@ separator.pack(fill='x', pady=10)
 instructions_label = ttk.Label(main_frame, text="Enter the content for the blog post below:", style='TLabel')
 instructions_label.pack()
 
-# Create a Text widget for the content with padding
-text_input = tk.Text(main_frame, height=10, width=50, padx=10, pady=10, font=('Helvetica', 10))
-text_input.pack()
+# Function to create a rounded rectangle on a canvas
+def create_rounded_rectangle(canvas, x1, y1, x2, y2, radius, **kwargs):
+    points = [
+        x1+radius, y1,
+        x1+radius, y1,
+        x2-radius, y1,
+        x2-radius, y1,
+        x2, y1,
+        x2, y1+radius,
+        x2, y1+radius,
+        x2, y2-radius,
+        x2, y2-radius,
+        x2, y2,
+        x2-radius, y2,
+        x2-radius, y2,
+        x1+radius, y2,
+        x1+radius, y2,
+        x1, y2,
+        x1, y2-radius,
+        x1, y2-radius,
+        x1, y1+radius,
+        x1, y1+radius,
+        x1, y1
+    ]
+
+    return canvas.create_polygon(points, **kwargs, smooth=True)
+
+# Create a Canvas widget for the rounded corners
+rounded_canvas = tk.Canvas(main_frame, width=380, height=140, bg='#f0f0f0', highlightthickness=0)
+rounded_canvas.pack(pady=(10, 0))
+
+# Draw a rounded rectangle on the Canvas
+create_rounded_rectangle(rounded_canvas, 10, 10, 370, 130, radius=20, fill='white')
+
+# Place the Text widget on top of the Canvas
+text_input = tk.Text(rounded_canvas, height=5, width=42, padx=10, pady=10, font=('Helvetica', 10), bd=0, highlightthickness=0)
+text_input.place(x=20, y=20)
 
 # Create another Separator
 separator2 = ttk.Separator(main_frame, orient='horizontal')
