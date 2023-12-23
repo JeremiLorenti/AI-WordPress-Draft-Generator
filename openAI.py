@@ -1,9 +1,9 @@
 import os
-import openai
+from openai import OpenAI
 
 def get_openai_response(prompt, is_title=False):
     # Assuming you have set your OpenAI API key in your environment variables
-    client = openai.OpenAI(
+    client = OpenAI(
         api_key=os.environ.get("OPENAI_API_KEY"),
     )
 
@@ -27,14 +27,11 @@ def get_openai_response(prompt, is_title=False):
         "content": prompt,
     }
 
-    # Use the OpenAI streaming endpoint with the correct method
-    stream = client.chat.completions.create(
-        model="gpt-4",  # or whichever model you're using
-        messages=[{"role": "system" if is_title else "user", "content": prompt}],
-        stream=True,
+    # Send the message to the OpenAI API with the system prompt first
+    chat_completion = client.chat.completions.create(
+        messages=[system_prompt, user_prompt],
+        model="gpt-4-1106-preview",
     )
 
-    # Yield the results as they are received
-    for chunk in stream:
-        if 'choices' in chunk and chunk['choices'][0]['delta']['content']:
-            yield chunk['choices'][0]['delta']['content']
+    # Return the content of the response
+    return chat_completion.choices[0].message.content
