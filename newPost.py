@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk  # Import ttk module for themed widgets
 from tkinter import simpledialog
 import requests
 import json
@@ -7,6 +8,11 @@ from openAI import get_openai_response
 import threading
 import os
 import dotenv
+import winsound
+
+def play_success_sound():
+    sound_file_path = 'C://Users//jerem//OneDrive//Desktop//WP//resources//sounds//success-1-6297.wav'
+    winsound.PlaySound(sound_file_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
 
 def create_draft_post(content, loading_label):
     # Update the loading label
@@ -61,6 +67,8 @@ def create_draft_post(content, loading_label):
     # Check the response and update the loading label with error logging
     if response.status_code == 201:
         loading_label.config(text='Draft post created successfully!')
+        # Play the success sound clip
+        play_success_sound()
     else:
         # Log the status code and response content for debugging
         print(f'Failed to create draft post. Status code: {response.status_code}')
@@ -76,19 +84,53 @@ def on_submit(loading_label):
 
 # Create the main window
 root = tk.Tk()
-root.title("AI Draft Post Creator")
+root.title("AI Draft Post Creator")  # Set a window title
+root.configure(background='#f0f0f0')  # Set the background color of the window
 
-# Create a Text widget for the content
-text_input = tk.Text(root, height=10, width=50)
+# Set the window size and position
+root.geometry('600x450+50+50')  # Width x Height + X position + Y position
+
+# Create a style object and configure styles
+style = ttk.Style()
+style.configure('TButton', padding=6, font=('Helvetica', 10))
+style.configure('TLabel', padding=6, background='#f0f0f0', font=('Helvetica', 10))
+style.configure('TEntry', padding=6)
+style.configure('TFrame', background='#f0f0f0')
+
+# Create a frame for padding and layout management
+main_frame = ttk.Frame(root, padding="20 20 20 20", style='TFrame')
+main_frame.pack(fill=tk.BOTH, expand=True)
+
+# Create a Label for the title
+title_label = ttk.Label(main_frame, text="AI Draft Post Creator", style='TLabel', font=('Helvetica', 16, 'bold'))
+title_label.pack()
+
+# Create a Separator
+separator = ttk.Separator(main_frame, orient='horizontal')
+separator.pack(fill='x', pady=10)
+
+# Create a Label for instructions
+instructions_label = ttk.Label(main_frame, text="Enter the content for the blog post below:", style='TLabel')
+instructions_label.pack()
+
+# Create a Text widget for the content with padding
+text_input = tk.Text(main_frame, height=10, width=50, padx=10, pady=10, font=('Helvetica', 10))
 text_input.pack()
 
+# Create another Separator
+separator2 = ttk.Separator(main_frame, orient='horizontal')
+separator2.pack(fill='x', pady=10)
+
 # Create a Label for loading indication
-loading_label = tk.Label(root, text='')
+loading_label = ttk.Label(main_frame, text='', style='TLabel')
 loading_label.pack()
 
-# Create a Button to submit the input
-submit_button = tk.Button(root, text="Create Draft Post", command=lambda: on_submit(loading_label))
-submit_button.pack()
+# Create a Button to submit the input with padding
+submit_button = ttk.Button(main_frame, text="Create Draft Post", command=lambda: on_submit(loading_label), style='TButton')
+submit_button.pack(pady=10)
+
+# Ensure the window opens in the center of the screen
+root.eval('tk::PlaceWindow . center')
 
 # Run the GUI loop
 root.mainloop()

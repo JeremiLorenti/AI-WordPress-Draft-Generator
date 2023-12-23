@@ -1,16 +1,16 @@
 import os
-from openai import OpenAI
+import openai
 
 def get_openai_response(prompt, is_title=False):
     # Assuming you have set your OpenAI API key in your environment variables
-    client = OpenAI(
+    client = openai.OpenAI(
         api_key=os.environ.get("OPENAI_API_KEY"),
     )
 
     # System prompt for title generation without HTML formatting
     system_prompt_title = {
         "role": "system",
-        "content": "You are a creative assistant. Please provide a single main title for a blog post as plain text. Do NOT include HTML formatting tags like <h1>, <h2>, or <h3> for the title. Keep the title concise and relevant to the content provided. Remember, no HTML formatting tags are required. Do not include HTML document structure tags like <html>, <head>, <body>, or an author's signature."
+        "content": "You are a creative assistant. Please provide a single main title for a blog post as plain text without quotes. Do NOT include HTML formatting tags like <h1>, <h2>, or <h3> for the title. Keep the title concise and relevant to the content provided. Remember, no HTML formatting tags are required. Do not include HTML document structure tags like <html>, <head>, <body>, or an author's signature."
     }
 
     # System prompt to provide guidelines to the AI for HTML formatting
@@ -27,11 +27,14 @@ def get_openai_response(prompt, is_title=False):
         "content": prompt,
     }
 
-    # Send the message to the OpenAI API with the system prompt first
-    chat_completion = client.chat.completions.create(
-        messages=[system_prompt, user_prompt],
-        model="gpt-4-1106-preview",
+    # Use the OpenAI streaming endpoint with the correct method
+    stream = client.chat.completions.create(
+        model="gpt-4",  # or whichever model you're using
+        messages=[{"role": "system" if is_title else "user", "content": prompt}],
+        stream=True,
     )
 
-    # Return the content of the response
-    return chat_completion.choices[0].message.content
+    # Yield the results as they are received
+    for chunk in stream:
+        if 'choices' in chunk and chunk['choices'][0]['delta']['content']:
+            yield chunk['choices'][0]['delta']['content']
