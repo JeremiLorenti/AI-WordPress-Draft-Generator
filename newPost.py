@@ -133,4 +133,4 @@ submit_button.pack(pady=10)
 root.eval('tk::PlaceWindow . center')
 
 # Run the GUI loop
-root.mainloop()
+root.mainloop() 
