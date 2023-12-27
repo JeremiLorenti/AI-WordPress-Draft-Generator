@@ -1,38 +1,68 @@
 # AI Draft Post Creator
 
-This project is a Python application that utilizes OpenAI's GPT-4 language model to generate draft blog posts based on the latest tech news articles. The application includes a GUI for user interaction and settings configuration.
+AI Draft Post Creator is a desktop application designed to streamline the process of creating draft posts for your WordPress blog using the power of AI. The application provides a user-friendly interface to generate draft posts based on the number of articles and paragraphs specified by the user.
 
 ## Features
 
-- Fetches the latest tech news articles
-- Scrapes content from article links
-- Uses OpenAI to generate content based on the scraped content
-- Creates draft posts with title, AI-generated content, and excerpt on WordPress
+- **Generate Draft Posts**: Easily create draft posts for your WordPress blog with AI assistance.
+- **WordPress Integration**: Directly connect to your WordPress site to manage categories and create drafts.
+- **Customizable Settings**: Configure your OpenAI and WordPress settings through a dedicated settings window.
+- **User-Friendly Interface**: Simple and intuitive interface for seamless operation.
 
-## Setup
+## Installation
 
-1. Clone the repository
-2. Install the required dependencies using `pip install -r requirements.txt`
-3. Run the application using `python app.py`
+To install AI Draft Post Creator, follow these steps:
 
-## Configuration
-
-- The OpenAI API key and WordPress settings can be configured through the GUI's "Settings" window.
-
-## File Structure
-
-- `.gitignore` excludes sensitive files and directories
-- `app.py` is the entry point of the application
-- `main_window.py` provides the main window of the application
-- `settings_window.py` provides the settings window of the application
-- `openAI.py` contains functions for interacting with the OpenAI API
-- `utils.py` includes utility functions for sound playback and web scraping
-- `wordpress_api.py` handles interactions with the WordPress REST API
+1. Ensure you have Python installed on your system.
+2. Clone the repository or download the source code.
+3. Install the required dependencies by running `pip install -r requirements.txt` in the project directory.
+4. Launch the application by running `python app.py`.
 
 ## Usage
 
-1. Launch the application to open the main window
-2. Enter the number of articles and click "Create New Draft" to generate draft posts
-3. Use the "Settings" button to configure OpenAI API key and WordPress settings
+Upon launching AI Draft Post Creator, you will be greeted with the main window where you can:
 
-Feel free to reach out for any questions or support.
+- Access the settings window to enter your OpenAI API key and WordPress credentials.
+- Specify the number of articles you wish to generate.
+- Click the "Create New Draft" button to initiate the draft post creation process.
+
+The application will then communicate with the OpenAI API to generate content and create a draft post on your WordPress site.
+
+## Configuration
+
+Before using the application to create draft posts, you must configure your OpenAI and WordPress settings:
+
+1. Click the settings button (gear icon) in the top right corner of the main window.
+2. Enter your OpenAI API key and WordPress site URL, username, and password.
+3. Save your settings.
+
+## Dependencies
+
+- `customtkinter`: For creating the custom user interface.
+- `requests`: For making HTTP requests to the WordPress API.
+- `base64`: For encoding authentication credentials.
+- `json`: For parsing and saving settings.
+- `tkinter`: For standard GUI elements and message boxes.
+- `threading`: For running tasks in separate threads to keep the UI responsive.
+- `webbrowser`: For opening URLs in the default web browser.
+
+## Contributing
+
+Contributions to AI Draft Post Creator are welcome. Please feel free to fork the repository, make changes, and submit pull requests.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- OpenAI for providing the GPT models used to generate content.
+- The WordPress REST API for enabling programmatic access to WordPress site management.
+
+## Contact
+
+For any inquiries or issues, please open an issue on the GitHub repository issue tracker.
+
+---
+
+Enjoy creating draft posts with ease using AI Draft Post Creator!
