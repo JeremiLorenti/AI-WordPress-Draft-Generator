@@ -13,7 +13,7 @@ This project is a Python application that utilizes OpenAI's GPT-4 language model
 
 1. Clone the repository
 2. Install the required dependencies using `pip install -r requirements.txt`
-3. Run the application using `python newPost.py`
+3. Run the application using `python app.py`
 
 ## Configuration
 
@@ -22,8 +22,9 @@ This project is a Python application that utilizes OpenAI's GPT-4 language model
 ## File Structure
 
 - `.gitignore` excludes sensitive files and directories
-- `newPost.py` contains the main functionality for fetching news articles, generating content, and creating draft posts
-- `gui.py` provides the graphical user interface for interacting with the application
+- `app.py` is the entry point of the application
+- `main_window.py` provides the main window of the application
+- `settings_window.py` provides the settings window of the application
 - `openAI.py` contains functions for interacting with the OpenAI API
 - `utils.py` includes utility functions for sound playback and web scraping
 - `wordpress_api.py` handles interactions with the WordPress REST API
