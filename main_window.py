@@ -5,6 +5,7 @@ from newPost import on_submit
 import threading
 import webbrowser
 import time
+import asyncio
 
 def center_window(window, width, height):
     # Get the screen width and height
@@ -81,7 +82,7 @@ class MainWindow:
             # Show loading indicator and start the timer
             self.spinner_label.configure(text="Loading... 0 seconds")
             # Start the update_timer method and store the reference
-            self.timer_job = self.update_timer()
+            self.timer_job = self.root.after(1000, self.update_timer)
             # Call the on_submit function with the number of articles in a separate thread
             threading.Thread(target=self.on_submit_thread, args=(self.spinner_label, num_articles, 1)).start()
         else:
@@ -98,12 +99,16 @@ class MainWindow:
 
     def on_submit_thread(self, spinner_label, num_articles, num_paragraphs):
         # Call the on_submit function and get the URL of the new draft post
-        post_url = on_submit(spinner_label, num_articles, num_paragraphs)
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        post_urls = loop.run_until_complete(on_submit(spinner_label, num_articles, num_paragraphs))
         # Stop the timer by canceling the scheduled update_timer method
-        self.root.after_cancel(self.timer_job)
+        if self.timer_job:
+            self.root.after_cancel(self.timer_job)
         # Update the spinner label to display the URL as a clickable link
-        spinner_label.configure(text=post_url, cursor="hand2")
-        spinner_label.bind("<Button-1>", lambda e: webbrowser.open_new(post_url))
+        for post_url in post_urls:
+            spinner_label.configure(text=str(post_url), cursor="hand2")
+            spinner_label.bind("<Button-1>", lambda e: webbrowser.open_new(str(post_url)))
 
     def show(self):
         center_window(self.root, 600, 350)  # Adjusted height from 300 to 350
