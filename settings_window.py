@@ -2,6 +2,7 @@
 import customtkinter as ctk
 import tkinter.messagebox as msgbox  # Correct import for messagebox
 from utils import is_valid_api_key, is_valid_url, load_settings, save_settings
+import webbrowser
 
 class SettingsWindow:
     def __init__(self):
@@ -11,6 +12,15 @@ class SettingsWindow:
         self.create_widgets()
 
     def create_widgets(self):
+        # Instructional text with link to OpenAI API keys page
+        instructional_text = "To use this application, you need an OpenAI API key. You can obtain one from "
+        link_text = "OpenAI API keys page"
+        instructional_label = ctk.CTkLabel(self.settings_root, text=instructional_text, font=("Lato", 10))
+        instructional_label.pack(pady=(10, 0))
+        link_label = ctk.CTkLabel(self.settings_root, text=link_text, font=("Lato", 10, 'underline'), text_color="blue", cursor="hand2")
+        link_label.pack(pady=(0, 10))
+        link_label.bind("<Button-1>", lambda e: webbrowser.open_new("https://platform.openai.com/api-keys"))
+
         # OpenAI API Settings
         openai_api_label = ctk.CTkLabel(self.settings_root, text="OpenAI API Key:", font=("Lato", 10))
         openai_api_label.pack(pady=(10, 0))
