@@ -3,6 +3,7 @@ import customtkinter as ctk
 from settings_window import SettingsWindow
 from newPost import on_submit
 import threading
+import webbrowser
 
 def center_window(window, width, height):
     # Get the screen width and height
@@ -48,7 +49,7 @@ class MainWindow:
         create_button.pack(pady=10)
 
         self.spinner_label = ctk.CTkLabel(self.root, text="")
-        self.spinner_label.pack(side='left', pady=10, padx=10)
+        self.spinner_label.pack(side='top', fill='x', expand=True)
 
     def open_settings_window(self):
         settings_window = SettingsWindow()
@@ -60,10 +61,17 @@ class MainWindow:
             # Show loading indicator
             self.spinner_label.configure(text="Loading...")
             # Call the on_submit function with the number of articles in a separate thread
-            threading.Thread(target=on_submit, args=(self.spinner_label, num_articles, 1)).start()
+            threading.Thread(target=self.on_submit_thread, args=(self.spinner_label, num_articles, 1)).start()
         else:
             # Show an error message if the input is not a positive integer
             ctk.messagebox.showerror("Error", "Please enter a valid number of articles.")
+
+    def on_submit_thread(self, spinner_label, num_articles, num_paragraphs):
+        # Call the on_submit function and get the URL of the new draft post
+        post_url = on_submit(spinner_label, num_articles, num_paragraphs)
+        # Update the spinner label to display the URL as a clickable link
+        spinner_label.configure(text=post_url, cursor="hand2")
+        spinner_label.bind("<Button-1>", lambda e: webbrowser.open_new(post_url))
 
     def show(self):
         center_window(self.root, 600, 300)  # Assuming the window size is 400x300

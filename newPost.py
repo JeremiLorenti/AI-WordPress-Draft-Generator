@@ -70,5 +70,7 @@ def on_submit(loading_label, num_articles, num_posts):
 
     # Update the loading label
     loading_label.configure(text="Drafts Successfully Created!")
-
     
+    # Return the URL of the new draft post
+    return create_draft_post(post_data)
+

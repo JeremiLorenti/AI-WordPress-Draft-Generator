@@ -36,7 +36,9 @@ def create_draft_post(post_data):
     # Check if the request was successful
     if response.status_code == 201:
         # Parse the JSON response
-        return response.json()
+        response_json = response.json()
+        # Return the URL of the created draft post
+        return response_json['link']
     else:
         print(f'Failed to create draft post. Status code: {response.status_code}')
         print(f'Response: {response.text}')  # Debugging information
