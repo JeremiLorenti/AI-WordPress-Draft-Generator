@@ -2,15 +2,19 @@
 import customtkinter as ctk
 from settings_window import SettingsWindow
 from newPost import on_submit
+import threading
 
-def center_window(window, width, height):
+def center_window(window):
     # Get the screen width and height
     screen_width = window.winfo_screenwidth()
     screen_height = window.winfo_screenheight()
+    # Get the window width and height
+    width = window.winfo_reqwidth()
+    height = window.winfo_reqheight()
     # Calculate the x and y coordinates for the Tk root window
     x = (screen_width // 2) - (width // 2)
     y = (screen_height // 2) - (height // 2)
-    # Set the window's geometry
+    # Set the window's geometry 
     window.geometry(f'{width}x{height}+{x}+{y}')
 
 class MainWindow:
@@ -54,9 +58,16 @@ class MainWindow:
         settings_window.show()
 
     def create_new_draft(self):
-        # Logic to create a new draft post
-        pass
+        num_articles = self.counter.get()
+        if num_articles.isdigit() and int(num_articles) > 0:
+            # Show loading indicator while the API call is being made
+            self.spinner_label.configure(text="Loading...")
+            # Call the on_submit function with the number of articles in a separate thread
+            threading.Thread(target=on_submit, args=(self.spinner_label, int(num_articles), 1)).start()        
+        else:
+            # Show an error message if the input is not a positive integer
+            ctk.messagebox.showerror("Error", "Please enter a valid number of articles.")
 
     def show(self):
-        center_window(self.root, 400, 300)  # Assuming the window size is 400x300
+        center_window(self.root)
         self.root.mainloop()
