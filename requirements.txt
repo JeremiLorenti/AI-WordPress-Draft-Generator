@@ -1,0 +1,5 @@
+beautifulsoup4==4.12.2
+customtkinter==5.2.1
+feedparser==6.0.11
+openai==1.6.1
+Requests==2.31.0
