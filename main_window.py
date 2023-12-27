@@ -24,7 +24,7 @@ class MainWindow:
         self.root.tk_setPalette(background='dark gray')
         ctk.set_appearance_mode("Dark")
         ctk.set_default_color_theme("dark-blue")
-        self.root.geometry('400x300+50+50')
+        self.root.geometry('400x350+50+50')  # Adjusted height from 300 to 350
         self.create_widgets()
 
     def create_widgets(self):
@@ -34,8 +34,21 @@ class MainWindow:
                                         command=self.open_settings_window, fg_color="gray")
         settings_button.pack(side='top', anchor='ne', padx=10, pady=10)
 
-        label = ctk.CTkLabel(self.root, text="Welcome to AI Draft Post Creator", font=('Lato', 20, 'bold'))
-        label.pack(pady=20)
+        # Welcome label (moved to the top)
+        welcome_label = ctk.CTkLabel(self.root, text="Welcome to AI Draft Post Creator", font=('Lato', 20, 'bold'))
+        welcome_label.pack(side='top', pady=20)
+
+        # Divider after welcome label
+        divider1 = ctk.CTkFrame(self.root, height=2, fg_color="gray75")
+        divider1.pack(side='top', fill='x', padx=10, pady=5)
+
+        # App description label
+        description_label = ctk.CTkLabel(self.root, text="This app helps you create draft posts for your blog with the power of AI. Simply enter the number of articles and let the AI do the rest.", font=("Lato", 10), wraplength=400)
+        description_label.pack(side='top', padx=10, pady=5)
+
+        # Divider after app description label
+        divider2 = ctk.CTkFrame(self.root, height=2, fg_color="gray75")
+        divider2.pack(side='top', fill='x', padx=10, pady=5)
 
         num_articles_frame = ctk.CTkFrame(self.root)
         num_articles_frame.pack(pady=10)
@@ -51,6 +64,10 @@ class MainWindow:
 
         self.spinner_label = ctk.CTkLabel(self.root, text="")
         self.spinner_label.pack(side='top', fill='x', expand=True)
+
+        # Instructional text label (moved to the bottom)
+        instructions_label = ctk.CTkLabel(self.root, text="Please click the settings button in the top right corner to enter the required information before creating a new draft.", font=("Lato", 10), wraplength=400)
+        instructions_label.pack(side='bottom', padx=10, pady=5)
 
     def open_settings_window(self):
         settings_window = SettingsWindow()
@@ -75,7 +92,7 @@ class MainWindow:
         # Calculate the elapsed time
         elapsed_time = int(time.time() - self.start_time)
         # Update the spinner label with the elapsed time
-        self.spinner_label.configure(text=f"Loading...\n{elapsed_time} seconds elapsed.\nThis may take a while.")
+        self.spinner_label.configure(text=f"Loading... {elapsed_time} seconds")
         # Schedule the update_timer method to be called after 1 second and store the reference
         self.timer_job = self.root.after(1000, self.update_timer)
 
@@ -89,5 +106,5 @@ class MainWindow:
         spinner_label.bind("<Button-1>", lambda e: webbrowser.open_new(post_url))
 
     def show(self):
-        center_window(self.root, 600, 300)  # Assuming the window size is 400x300
+        center_window(self.root, 600, 350)  # Adjusted height from 300 to 350
         self.root.mainloop()
