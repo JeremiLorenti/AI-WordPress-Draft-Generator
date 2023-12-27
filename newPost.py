@@ -39,36 +39,32 @@ async def select_relevant_categories(post_content):
 
     return relevant_category_ids
 
-async def on_submit(loading_label, num_articles, num_posts):
+async def on_submit(loading_label, num_articles, num_posts, progress_label):
     # Fetch the latest news articles
     latest_articles = fetch_latest_tech_news(num_articles=int(num_articles))
 
-    threads = []
     post_urls = []  # List to collect the URLs of the new draft posts
     for article in latest_articles[:int(num_posts)]:
-        # Scrape the content from the article link
-        article_content = scrape_content_from_url(article.link)
+        try:
+            # Scrape the content from the article link
+            article_content = scrape_content_from_url(article.link)
 
-        # Use the AI to generate content based on the scraped content
-        ai_generated_content = get_openai_response(article_content)
+            # Use the AI to generate content based on the scraped content
+            ai_generated_content = get_openai_response(article_content)
 
-        # Construct post_data with title, AI-generated content, and excerpt
-        post_data = {
-            'title': article.title,
-            'content': ai_generated_content,
-            'excerpt': article.summary
-        }
-        thread = threading.Thread(target=asyncio.run, args=(create_draft_post(post_data),))
-        thread.start()
-        threads.append(thread)
+            # Construct post_data with title, AI-generated content, and excerpt
+            post_data = {
+                'title': article.title,
+                'content': ai_generated_content,
+                'excerpt': article.summary
+            }
 
-        # Collect the URL of the new draft post
-        post_url = await create_draft_post(post_data)
-        post_urls.append(post_url)
-
-    # Wait for all threads to complete
-    for thread in threads:
-        thread.join()
+            # Collect the URL of the new draft post
+            post_url = await create_draft_post(post_data)
+            post_urls.append(post_url)
+        except Exception as e:
+            print(f"An error occurred: {str(e)}")
+            raise e
 
     # Play success sound
     play_success_sound()

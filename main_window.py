@@ -63,6 +63,10 @@ class MainWindow:
         create_button = ctk.CTkButton(self.root, text="Create New Draft", command=self.create_new_draft, font=("Lato", 10))
         create_button.pack(pady=10)
 
+        # Progress Indicator Label
+        self.progress_label = ctk.CTkLabel(self.root, text="")
+        self.progress_label.pack(side='top', fill='x', expand=True)
+
         self.spinner_label = ctk.CTkLabel(self.root, text="")
         self.spinner_label.pack(side='top', fill='x', expand=True)
 
@@ -84,7 +88,7 @@ class MainWindow:
             # Start the update_timer method and store the reference
             self.timer_job = self.root.after(1000, self.update_timer)
             # Call the on_submit function with the number of articles in a separate thread
-            threading.Thread(target=self.on_submit_thread, args=(self.spinner_label, num_articles, 1)).start()
+            threading.Thread(target=self.on_submit_thread, args=(self.spinner_label, num_articles, 1, self.progress_label)).start()
         else:
             # Show an error message if the input is not a positive integer
             ctk.messagebox.showerror("Error", "Please enter a valid number of articles.")
@@ -97,18 +101,23 @@ class MainWindow:
         # Schedule the update_timer method to be called after 1 second and store the reference
         self.timer_job = self.root.after(1000, self.update_timer)
 
-    def on_submit_thread(self, spinner_label, num_articles, num_paragraphs):
+    def on_submit_thread(self, spinner_label, num_articles, num_paragraphs, progress_label):
         # Call the on_submit function and get the URL of the new draft post
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        post_urls = loop.run_until_complete(on_submit(spinner_label, num_articles, num_paragraphs))
+        result = loop.run_until_complete(on_submit(spinner_label, num_articles, num_paragraphs, progress_label))
         # Stop the timer by canceling the scheduled update_timer method
         if self.timer_job:
             self.root.after_cancel(self.timer_job)
-        # Update the spinner label to display the URL as a clickable link
-        for post_url in post_urls:
-            spinner_label.configure(text=str(post_url), cursor="hand2")
-            spinner_label.bind("<Button-1>", lambda e: webbrowser.open_new(str(post_url)))
+        # Check if the result is an error message
+        if isinstance(result, str) and result.startswith("Error:"):
+            # Display the error message
+            ctk.messagebox.showerror("Error", result)
+        else:
+            # Update the spinner label to display the URL as a clickable link
+            for post_url in result:
+                spinner_label.configure(text=str(post_url), cursor="hand2")
+                spinner_label.bind("<Button-1>", lambda e: webbrowser.open_new(str(post_url)))
 
     def show(self):
         center_window(self.root, 600, 350)  # Adjusted height from 300 to 350
