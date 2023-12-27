@@ -65,12 +65,10 @@ def on_submit(loading_label, num_articles, num_posts):
     for thread in threads:
         thread.join()
 
-# Create the main window
-def create_main_window():
-    from gui import create_main_window
-    root, num_articles, spinner_label = create_main_window()
+    # Play success sound
+    play_success_sound()
 
-    # Run the GUI loop
-    root.mainloop()
-if __name__ == "__main__":
-    create_main_window()
+    # Update the loading label
+    loading_label.configure(text="Drafts Successfully Created!")
+
+    
