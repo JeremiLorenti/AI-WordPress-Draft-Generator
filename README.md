@@ -1,34 +1,37 @@
 # AI Draft Post Creator
 
-This is a Python application that uses OpenAI to generate draft blog posts.
+This project is a Python application that utilizes OpenAI's GPT-4 language model to generate draft blog posts based on the latest tech news articles. The application includes a GUI for user interaction and settings configuration.
 
-## Files
+## Features
 
-### newPost.py
+- Fetches the latest tech news articles
+- Scrapes content from article links
+- Uses OpenAI to generate content based on the scraped content
+- Creates draft posts with title, AI-generated content, and excerpt on WordPress
 
-This script creates a GUI for the user to input the content for a blog post. It then uses OpenAI to generate a title and content for the post, and creates a draft post on a WordPress website.
+## Setup
 
-### openAI.py
+1. Clone the repository
+2. Install the required dependencies using `pip install -r requirements.txt`
+3. Run the application using `python newPost.py`
 
-This script contains the function `get_openai_response`, which sends a prompt to the OpenAI API and returns the generated response.
+## Configuration
+
+- The OpenAI API key and WordPress settings can be configured through the GUI's "Settings" window.
+
+## File Structure
+
+- `.gitignore` excludes sensitive files and directories
+- `newPost.py` contains the main functionality for fetching news articles, generating content, and creating draft posts
+- `gui.py` provides the graphical user interface for interacting with the application
+- `openAI.py` contains functions for interacting with the OpenAI API
+- `utils.py` includes utility functions for sound playback and web scraping
+- `wordpress_api.py` handles interactions with the WordPress REST API
 
 ## Usage
 
-1. Run `newPost.py`.
-2. Enter the content for the blog post in the text box.
-3. Click "Create Draft Post" to generate the post and create a draft on the WordPress website.
+1. Launch the application to open the main window
+2. Enter the number of articles and click "Create New Draft" to generate draft posts
+3. Use the "Settings" button to configure OpenAI API key and WordPress settings
 
-## Requirements
-
-- Python 3
-- tkinter
-- requests
-- json
-- base64
-- threading
-- os
-- dotenv
-- winsound
-- OpenAI API key
-- WordPress website with REST API enabled
-- WordPress username and application password
+Feel free to reach out for any questions or support.
