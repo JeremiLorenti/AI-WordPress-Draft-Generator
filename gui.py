@@ -1,5 +1,3 @@
-import tkinter as tk
-from tkinter import ttk  # Import ttk for standard tkinter widgets
 import customtkinter as ctk  # Import customtkinter for custom widgets
 import os
 import json
@@ -60,7 +58,7 @@ def load_settings():
 
 # Create a button to open settings window
 def create_settings_window():
-    settings_root = tk.Toplevel()
+    settings_root = ctk.CTkToplevel()
     settings_root.title("Settings")
     
     # Set a fixed width and height for the settings window
@@ -132,7 +130,7 @@ def spinner_animation(label, counter=[0]):
         # Define the spinner frames
         frames = "|/-\\"
         # Update the label with the next frame
-        label.config(text=frames[counter[0]])
+        label.configure(text=frames[counter[0]])
         # Increment the counter to the next frame
         counter[0] = (counter[0] + 1) % len(frames)
         # Schedule the next update
@@ -146,7 +144,7 @@ def stop_spinner_when_done(thread, label, root):
     else:
         # Stop the spinner animation and display the success message
         spinner_running = False
-        label.config(text="Draft Created Successfully")
+        label.configure(text="Draft Created Successfully")
 
 def create_button_command(num_articles, spinner_label, root):
     global spinner_running
@@ -155,13 +153,13 @@ def create_button_command(num_articles, spinner_label, root):
     # Start the spinner animation
     spinner_animation(spinner_label)
     # Create a new thread to run the on_submit function without blocking the GUI
-    submit_thread = threading.Thread(target=on_submit, args=(None, num_articles.get(), 1))
+    submit_thread = threading.Thread(target=on_submit, args=(None, num_articles, 1))
     submit_thread.start()
     # Schedule the function to stop the spinner when the thread is done
     stop_spinner_when_done(submit_thread, spinner_label, root)
 
 def create_main_window():
-    root = tk.Tk()
+    root = ctk.CTk()
     root.title("AI Draft Post Creator")  # Set a window title
     # Set window background color to dark gray
     root.configure(bg="dark gray")
@@ -180,12 +178,13 @@ def create_main_window():
     root.eval('tk::PlaceWindow . center')
 
     # Create a counter for number of articles
-    num_articles = tk.IntVar(value=1)
-    counter = ttk.Spinbox(root, from_=1, to=100, textvariable=num_articles, font=("Lato", 10))
+    num_articles = 1
+    counter = ctk.CTkEntry(root, width=3, font=("Lato", 10))
+    counter.insert(0, num_articles)
     counter.pack(pady=10)
 
     # Create a spinner label
-    spinner_label = tk.Label(root, text="")
+    spinner_label = ctk.CTkLabel(root, text="")
 
     # Create a button and add it to the window using pack layout manager
     create_button = ctk.CTkButton(root, text="Create New Draft", command=lambda: create_button_command(num_articles, spinner_label, root), font=("Lato", 10))
