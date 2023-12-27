@@ -44,20 +44,20 @@ class SettingsWindow:
         # Save Settings Button
         save_button = ctk.CTkButton(self.settings_root, text="Save Settings", command=self.save_settings, corner_radius=10, fg_color="#00A2FF", hover_color="#007ACC", font=("Lato", 10))
         save_button.pack(pady=10)
-    
-        def save_settings(self):
-            openai_api_key = self.openai_api_entry.get()
-            wordpress_url = self.wordpress_url_entry.get()
-            wordpress_username = self.wordpress_username_entry.get()
-            wordpress_password = self.wordpress_password_entry.get()
-            try:
-                # Call the save_settings function from utils.py
-                save_settings(openai_api_key, wordpress_url, wordpress_username, wordpress_password)
-                # Show a confirmation message using standard tkinter messagebox
-                msgbox.showinfo("Settings Saved", "Your settings have been saved successfully.")
-            except Exception as e:
-                # Show an error message using standard tkinter messagebox
-                msgbox.showerror("Error", f"An error occurred while saving settings: {e}")
+
+    def save_settings(self):
+        openai_api_key = self.openai_api_entry.get()
+        wordpress_url = self.wordpress_url_entry.get()
+        wordpress_username = self.wordpress_username_entry.get()
+        wordpress_password = self.wordpress_password_entry.get()
+        try:
+            # Call the save_settings function from utils.py
+            save_settings(openai_api_key, wordpress_url, wordpress_username, wordpress_password)
+            # Show a confirmation message using standard tkinter messagebox
+            msgbox.showinfo("Settings Saved", "Your settings have been saved successfully.")
+        except Exception as e:
+            # Show an error message using standard tkinter messagebox
+            msgbox.showerror("Error", f"An error occurred while saving settings: {e}")
 
     def center_window(self, width=500, height=400):  # Adjust the size as needed
         # Get screen width and height
