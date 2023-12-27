@@ -25,7 +25,7 @@ class MainWindow:
         self.root.tk_setPalette(background='dark gray')
         ctk.set_appearance_mode("Dark")
         ctk.set_default_color_theme("dark-blue")
-        self.root.geometry('400x350+50+50')  # Adjusted height from 300 to 350
+        self.root.geometry('400x400+50+50')  # Adjusted height from 350 to 400
         self.create_widgets()
 
     def create_widgets(self):
@@ -120,5 +120,5 @@ class MainWindow:
                 spinner_label.bind("<Button-1>", lambda e: webbrowser.open_new(str(post_url)))
 
     def show(self):
-        center_window(self.root, 600, 350)  # Adjusted height from 300 to 350
+        center_window(self.root, 600, 400)  # Adjusted height from 350 to 400
         self.root.mainloop()
