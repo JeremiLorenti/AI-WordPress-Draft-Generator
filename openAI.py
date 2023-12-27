@@ -1,13 +1,23 @@
 # Import the os module to interact with the operating system, such as environment variables.
 import os
+# Import the json module to interact with json files.
+import json
 # Import the OpenAI class from the openai package to interact with the OpenAI API.
 from openai import OpenAI
 
+# Define a function to load settings from settings.json
+def load_settings():
+    with open('settings.json') as f:
+        return json.load(f)
+
 # Define a function named get_openai_response that takes a prompt and an optional is_title flag.
 def get_openai_response(prompt, is_title=False):
-    # Create an instance of the OpenAI class using the API key retrieved from the environment variables.
+    # Load settings from settings.json
+    settings = load_settings()
+
+    # Create an instance of the OpenAI class using the API key retrieved from the settings.
     client = OpenAI(
-        api_key=os.environ.get("OPENAI_API_KEY"),
+        api_key=settings.get("OPENAI_API_KEY"),
     )
 
     # Define a dictionary for the system prompt when generating a title. This prompt sets the role of the AI.
@@ -21,7 +31,7 @@ def get_openai_response(prompt, is_title=False):
     system_prompt_content = {
         "role": "system",  # The role is set to 'system' to indicate that this is an instruction.
         # The content provides guidelines for the AI to generate HTML-formatted content for a blog post.
-        "content": "You are a creative assistant. Please respond with content formatted in HTML suitable for a blog post body. Use <h3> tags for section headings and <p> tags for paragraphs. Do not include HTML document structure tags like <html>, <head>, <body>, or an author's signature."
+        "content": "You are a creative assistant. Please create a new, original blog post using the following article as source material. Do not plagiarize. Use your creativity to generate a unique article based on the information provided."
     }
 
     # Choose the appropriate system prompt based on whether the is_title flag is True or False.

@@ -6,6 +6,8 @@ import json
 import tkinter.messagebox as msgbox
 import re
 from urllib.parse import urlparse
+import threading
+import time
 
 # Define the path to the settings file
 settings_file_path = 'settings.json'
@@ -56,7 +58,7 @@ def load_settings():
         # If the settings file does not exist, return None
         return None
 
-    # Create a button to open settings window
+# Create a button to open settings window
 def create_settings_window():
     settings_root = tk.Toplevel()
     settings_root.title("Settings")
@@ -120,6 +122,44 @@ def create_settings_window():
 
     return settings_root
 
+# Add a global variable to control the spinner animation
+spinner_running = True
+
+# Define the spinner animation function
+def spinner_animation(label, counter=[0]):
+    global spinner_running
+    if spinner_running:
+        # Define the spinner frames
+        frames = "|/-\\"
+        # Update the label with the next frame
+        label.config(text=frames[counter[0]])
+        # Increment the counter to the next frame
+        counter[0] = (counter[0] + 1) % len(frames)
+        # Schedule the next update
+        label.after(100, spinner_animation, label, counter)
+
+def stop_spinner_when_done(thread, label, root):
+    global spinner_running
+    if thread.is_alive():
+        # Schedule this function to be called again after 100ms
+        root.after(100, stop_spinner_when_done, thread, label, root)
+    else:
+        # Stop the spinner animation and display the success message
+        spinner_running = False
+        label.config(text="Draft Created Successfully")
+
+def create_button_command(num_articles, spinner_label, root):
+    global spinner_running
+    from newPost import on_submit  # Import the on_submit function from newPost.py
+    spinner_running = True
+    # Start the spinner animation
+    spinner_animation(spinner_label)
+    # Create a new thread to run the on_submit function without blocking the GUI
+    submit_thread = threading.Thread(target=on_submit, args=(None, num_articles.get(), 1))
+    submit_thread.start()
+    # Schedule the function to stop the spinner when the thread is done
+    stop_spinner_when_done(submit_thread, spinner_label, root)
+
 def create_main_window():
     root = tk.Tk()
     root.title("AI Draft Post Creator")  # Set a window title
@@ -139,8 +179,19 @@ def create_main_window():
     # Ensure the window opens in the center of the screen
     root.eval('tk::PlaceWindow . center')
 
+    # Create a counter for number of articles
+    num_articles = tk.IntVar(value=1)
+    counter = ttk.Spinbox(root, from_=1, to=100, textvariable=num_articles, font=("Lato", 10))
+    counter.pack(pady=10)
+
+    # Create a spinner label
+    spinner_label = tk.Label(root, text="")
+
+    # Create a button and add it to the window using pack layout manager
+    create_button = ctk.CTkButton(root, text="Create New Draft", command=lambda: create_button_command(num_articles, spinner_label, root), font=("Lato", 10))
+    create_button.pack(pady=10)
+
     # Create a label and add it to the window using pack layout manager
-    
     label = ctk.CTkLabel(root, text="Welcome to AI Draft Post Creator", font=('Lato', 20, 'bold'))
     label.pack(pady=10)
 
@@ -148,8 +199,6 @@ def create_main_window():
     settings_button = ctk.CTkButton(root, text="Settings", command=create_settings_window, font=("Lato", 10))
     settings_button.pack(pady=10)
 
-    # Create a button and add it to the window using pack layout manager
-    create_button = ctk.CTkButton(root, text="Create New Draft", font=("Lato", 10))
-    create_button.pack(pady=10)
+    spinner_label.pack()
 
-    return root
+    return root, num_articles, spinner_label

@@ -3,10 +3,11 @@
 import requests
 import base64
 import os
+import json
 
 def get_wordpress_categories():
     # Your WordPress website URL
-    wordpress_url = os.environ.get('WORDPRESS_URL')
+    wordpress_url = get_wordpress_url()
     # REST API endpoint for retrieving categories
     categories_endpoint = wordpress_url + '/wp-json/wp/v2/categories'
     # Send the GET request
@@ -21,12 +22,11 @@ def get_wordpress_categories():
 
 def create_draft_post(post_data):
     # Your WordPress website URL
-    wordpress_url = os.environ.get('WORDPRESS_URL')
+    wordpress_url = get_wordpress_url()
     # REST API endpoint for creating a draft post
     posts_endpoint = wordpress_url + '/wp-json/wp/v2/posts'
     # Prepare the authentication headers
-    username = os.environ.get('WORDPRESS_USERNAME')
-    password = os.environ.get('WORDPRESS_APP_PASSWORD')
+    username, password = get_wordpress_credentials()
     token = base64.b64encode(f"{username}:{password}".encode('utf-8')).decode('utf-8')
     headers = {
         'Authorization': f'Basic {token}'
@@ -39,7 +39,22 @@ def create_draft_post(post_data):
         return response.json()
     else:
         print(f'Failed to create draft post. Status code: {response.status_code}')
+        print(f'Response: {response.text}')  # Debugging information
+        print(f'Headers: {headers}')  # Debugging information
         return None
 
-# Other WordPress-related functions...
+def get_wordpress_url():
+    # Load settings from settings.json
+    with open('settings.json') as f:
+        settings = json.load(f)
+    # Return the WordPress URL
+    return settings['WORDPRESS_URL']
 
+def get_wordpress_credentials():
+    # Load settings from settings.json
+    with open('settings.json') as f:
+        settings = json.load(f)
+    # Return the WordPress username and password
+    return settings['WORDPRESS_USERNAME'], settings['WORDPRESS_PASSWORD']
+
+# Other WordPress-related functions...

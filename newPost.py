@@ -5,8 +5,7 @@ import customtkinter as ctk  # Import customtkinter for custom widgets
 from openAI import get_openai_response
 import threading
 from wordpress_api import get_wordpress_categories, create_draft_post
-from utils import play_success_sound
-from gui import create_main_window
+from utils import play_success_sound, scrape_content_from_url  # Import the new function to scrape content
 from news_fetcher import fetch_latest_tech_news
 
 def select_relevant_categories(post_content):
@@ -46,7 +45,19 @@ def on_submit(loading_label, num_articles, num_posts):
 
     threads = []
     for article in latest_articles[:int(num_posts)]:
-        thread = threading.Thread(target=create_draft_post, args=(loading_label, article.link))
+        # Scrape the content from the article link
+        article_content = scrape_content_from_url(article.link)
+
+        # Use the AI to generate content based on the scraped content
+        ai_generated_content = get_openai_response(article_content)
+
+        # Construct post_data with title, AI-generated content, and excerpt
+        post_data = {
+            'title': article.title,
+            'content': ai_generated_content,
+            'excerpt': article.summary
+        }
+        thread = threading.Thread(target=create_draft_post, args=(post_data,))
         thread.start()
         threads.append(thread)
 
@@ -55,7 +66,11 @@ def on_submit(loading_label, num_articles, num_posts):
         thread.join()
 
 # Create the main window
-root = create_main_window()
+def create_main_window():
+    from gui import create_main_window
+    root, num_articles, spinner_label = create_main_window()
 
-# Run the GUI loop
-root.mainloop()
+    # Run the GUI loop
+    root.mainloop()
+if __name__ == "__main__":
+    create_main_window()
