@@ -4,6 +4,7 @@ from settings_window import SettingsWindow
 from newPost import on_submit
 import threading
 import webbrowser
+import time
 
 def center_window(window, width, height):
     # Get the screen width and height
@@ -58,17 +59,31 @@ class MainWindow:
     def create_new_draft(self):
         num_articles = self.counter.get()
         if num_articles.isdigit() and int(num_articles) > 0:
-            # Show loading indicator
-            self.spinner_label.configure(text="Loading...")
+            # Initialize the timer
+            self.start_time = time.time()
+            # Show loading indicator and start the timer
+            self.spinner_label.configure(text="Loading... 0 seconds")
+            # Start the update_timer method and store the reference
+            self.timer_job = self.update_timer()
             # Call the on_submit function with the number of articles in a separate thread
             threading.Thread(target=self.on_submit_thread, args=(self.spinner_label, num_articles, 1)).start()
         else:
             # Show an error message if the input is not a positive integer
             ctk.messagebox.showerror("Error", "Please enter a valid number of articles.")
 
+    def update_timer(self):
+        # Calculate the elapsed time
+        elapsed_time = int(time.time() - self.start_time)
+        # Update the spinner label with the elapsed time
+        self.spinner_label.configure(text=f"Loading...\n{elapsed_time} seconds elapsed.\nThis may take a while.")
+        # Schedule the update_timer method to be called after 1 second and store the reference
+        self.timer_job = self.root.after(1000, self.update_timer)
+
     def on_submit_thread(self, spinner_label, num_articles, num_paragraphs):
         # Call the on_submit function and get the URL of the new draft post
         post_url = on_submit(spinner_label, num_articles, num_paragraphs)
+        # Stop the timer by canceling the scheduled update_timer method
+        self.root.after_cancel(self.timer_job)
         # Update the spinner label to display the URL as a clickable link
         spinner_label.configure(text=post_url, cursor="hand2")
         spinner_label.bind("<Button-1>", lambda e: webbrowser.open_new(post_url))
