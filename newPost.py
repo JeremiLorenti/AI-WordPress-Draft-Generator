@@ -50,7 +50,16 @@ async def on_submit(loading_label, num_articles, num_posts, progress_label):
             article_content = scrape_content_from_url(article.link)
 
             # Use the AI to generate content based on the scraped content
-            ai_generated_content = get_openai_response(article_content)
+            ai_prompt = (
+                f"Given the following content: '{article_content}'\n"
+                "Please rewrite it in HTML format suitable for a blog post. Start the article with an opening paragraph. You do not need to include a beginning title or heading"
+                "since the main title is handled separately. Use HTML tags for styling such as "
+                "<p> for paragraphs, <strong> for bold text, <em> for italics, "
+                "and <ul> or <ol> with <li> for lists. Do not include backticks (`), markdown formatting such as hashtags for headers or "
+                "asterisks for lists, or HTML document structure tags like <!DOCTYPE>, <html>, <head>, or <body>. Also do not include `html at the start or ` at the end. The output should be a properly formated article containing only the article content itself, free of formatting tags or encodings.\n"
+            )
+           
+            ai_generated_content = get_openai_response(ai_prompt)
 
             # Construct post_data with title, AI-generated content, and excerpt
             post_data = {
