@@ -1,5 +1,7 @@
 # AI Draft Post Creator
 
+## *VERY MUCH A WORK IN PROGRESS*
+
 AI Draft Post Creator is a desktop application designed to streamline the process of creating draft posts for your WordPress blog using the power of AI. The application provides a user-friendly interface to generate draft posts based on the number of articles and paragraphs specified by the user.
 
 ## Features
