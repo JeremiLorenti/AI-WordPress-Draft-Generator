@@ -43,6 +43,12 @@ class SettingsWindow:
         self.wordpress_password_entry = ctk.CTkEntry(self.settings_root, width=300, show="*", placeholder_text="Enter your WordPress password here.", font=("Lato", 10))
         self.wordpress_password_entry.pack(pady=(0, 10))
 
+        # Article Preview Feature Checkbox
+        article_preview_label = ctk.CTkLabel(self.settings_root, text="Enable article preview and feedback:", font=("Lato", 10))
+        article_preview_label.pack(pady=(10, 0))
+        self.article_preview_checkbox = ctk.CTkCheckBox(self.settings_root)
+        self.article_preview_checkbox.pack(pady=(0, 10))
+
         # Load existing settings and populate the fields
         existing_settings = load_settings()
         if existing_settings:
@@ -50,6 +56,10 @@ class SettingsWindow:
             self.wordpress_url_entry.insert(0, existing_settings.get('WORDPRESS_URL', ''))
             self.wordpress_username_entry.insert(0, existing_settings.get('WORDPRESS_USERNAME', ''))
             self.wordpress_password_entry.insert(0, existing_settings.get('WORDPRESS_PASSWORD', ''))
+            if existing_settings.get('ARTICLE_PREVIEW', False):
+                self.article_preview_checkbox.select()
+            else:
+                self.article_preview_checkbox.deselect()
 
         # Save Settings Button
         save_button = ctk.CTkButton(self.settings_root, text="Save Settings", command=self.save_settings, corner_radius=10, fg_color="#00A2FF", hover_color="#007ACC", font=("Lato", 10))
@@ -60,9 +70,10 @@ class SettingsWindow:
         wordpress_url = self.wordpress_url_entry.get()
         wordpress_username = self.wordpress_username_entry.get()
         wordpress_password = self.wordpress_password_entry.get()
+        article_preview = self.article_preview_checkbox.get()
         try:
             # Call the save_settings function from utils.py
-            save_settings(openai_api_key, wordpress_url, wordpress_username, wordpress_password)
+            save_settings(openai_api_key, wordpress_url, wordpress_username, wordpress_password, article_preview)
             # Show a confirmation message using standard tkinter messagebox
             msgbox.showinfo("Settings Saved", "Your settings have been saved successfully.")
         except Exception as e:

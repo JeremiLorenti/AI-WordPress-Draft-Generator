@@ -119,6 +119,61 @@ class MainWindow:
                 spinner_label.configure(text=str(post_url), cursor="hand2")
                 spinner_label.bind("<Button-1>", lambda e: webbrowser.open_new(str(post_url)))
 
+    def display_article_preview(self, article_html):
+        # Create a new top-level window for the article preview
+        preview_window = ctk.CTkToplevel(self.root)
+        preview_window.title("Article Preview")
+        preview_window.geometry('600x400')  # Adjust the size as needed
+
+        # Add a Text widget to display the article content
+        article_textbox = ctk.CTkTextbox(preview_window, width=580, height=350)
+        article_textbox.insert('end', article_html)
+        article_textbox.pack(pady=(10, 10))
+
+        # Add Approve and Disapprove buttons
+        approve_button = ctk.CTkButton(preview_window, text="Approve", command=lambda: self.handle_article_approval(True))
+        approve_button.pack(side='left', padx=(50, 10), pady=10)
+
+        disapprove_button = ctk.CTkButton(preview_window, text="Disapprove", command=lambda: self.handle_article_approval(False))
+        disapprove_button.pack(side='right', padx=(10, 50), pady=10)
+
+        # Display the preview window
+        preview_window.mainloop()
+
+    def handle_article_approval(self, approved):
+        if approved:
+            # If the user approves, proceed with posting the article as a draft
+            self.post_article_to_wordpress()
+        else:
+            # If the user disapproves, open a feedback window
+            self.collect_feedback()
+
+    def collect_feedback(self):
+        # Open a feedback window and collect feedback from the user
+        feedback_window = ctk.CTkToplevel(self.root)
+        feedback_window.title("Provide Feedback")
+        feedback_window.geometry('400x200')  # Adjust the size as needed
+
+        # Add a Text widget to collect the feedback
+        feedback_label = ctk.CTkLabel(feedback_window, text="Please provide feedback for the AI:", font=("Lato", 10))
+        feedback_label.pack(pady=(10, 0))
+        self.feedback_entry = ctk.CTkEntry(feedback_window, width=50, font=("Lato", 10))
+        self.feedback_entry.pack(pady=(0, 10))
+
+        # Add a Submit button to submit the feedback
+        submit_button = ctk.CTkButton(feedback_window, text="Submit Feedback", command=self.submit_feedback, font=("Lato", 10))
+        submit_button.pack(pady=10)
+
+        # Display the feedback window
+        feedback_window.mainloop()
+
+    def submit_feedback(self):
+        # Get the feedback from the feedback_entry widget
+        feedback = self.feedback_entry.get()
+        # Call the on_submit function again with the feedback
+        threading.Thread(target=self.on_submit_thread, args=(self.spinner_label, self.num_articles, 1, self.progress_label, feedback)).start()
+
     def show(self):
         center_window(self.root, 600, 400)  # Adjusted height from 350 to 400
         self.root.mainloop()
+        

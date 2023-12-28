@@ -24,7 +24,7 @@ def is_valid_url(url):
     parsed_url = urlparse(url)
     return all([parsed_url.scheme, parsed_url.netloc])
 
-def save_settings(openai_api_key, wordpress_url, wordpress_username, wordpress_password):
+def save_settings(openai_api_key, wordpress_url, wordpress_username, wordpress_password, article_preview):
     # Validate the OpenAI API key
     if not is_valid_api_key(openai_api_key):
         raise ValueError("The OpenAI API key is invalid.")
@@ -38,7 +38,8 @@ def save_settings(openai_api_key, wordpress_url, wordpress_username, wordpress_p
         'OPENAI_API_KEY': openai_api_key,
         'WORDPRESS_URL': wordpress_url,
         'WORDPRESS_USERNAME': wordpress_username,
-        'WORDPRESS_PASSWORD': wordpress_password
+        'WORDPRESS_PASSWORD': wordpress_password,
+        'ARTICLE_PREVIEW': article_preview
     }
     with open(settings_file_path, 'w') as settings_file:
         json.dump(settings, settings_file, indent=4)

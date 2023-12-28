@@ -39,7 +39,7 @@ async def select_relevant_categories(post_content):
 
     return relevant_category_ids
 
-async def on_submit(loading_label, num_articles, num_posts, progress_label):
+async def on_submit(loading_label, num_articles, num_posts, progress_label, feedback=None):
     # Fetch the latest news articles
     latest_articles = fetch_latest_tech_news(num_articles=int(num_articles))
 
@@ -58,7 +58,11 @@ async def on_submit(loading_label, num_articles, num_posts, progress_label):
                 "and <ul> or <ol> with <li> for lists. Do not include backticks (`), markdown formatting such as hashtags for headers or "
                 "asterisks for lists, or HTML document structure tags like <!DOCTYPE>, <html>, <head>, or <body>. Also do not include `html at the start or ` at the end. The output should be a properly formated article containing only the article content itself, free of formatting tags or encodings.\n"
             )
-           
+
+            # If feedback is provided, add it to the prompt
+            if feedback:
+                ai_prompt += f"\nFeedback: {feedback}\nPlease revise the content based on the feedback above."
+
             ai_generated_content = get_openai_response(ai_prompt)
 
             # Construct post_data with title, AI-generated content, and excerpt
