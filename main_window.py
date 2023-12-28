@@ -6,6 +6,7 @@ import threading
 import webbrowser
 import time
 import asyncio
+from utils import load_settings  # Import load_settings from utils
 
 def center_window(window, width, height):
     # Get the screen width and height
@@ -27,6 +28,7 @@ class MainWindow:
         ctk.set_default_color_theme("dark-blue")
         self.root.geometry('400x400+50+50')  # Adjusted height from 350 to 400
         self.create_widgets()
+        self.settings = load_settings()  # Load settings when MainWindow is initialized
 
     def create_widgets(self):
         # Settings Button with Gear Icon
@@ -176,4 +178,3 @@ class MainWindow:
     def show(self):
         center_window(self.root, 600, 400)  # Adjusted height from 350 to 400
         self.root.mainloop()
-        
