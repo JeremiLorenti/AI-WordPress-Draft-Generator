@@ -140,6 +140,9 @@ class MainWindow:
             if self.settings.get('ARTICLE_PREVIEW', False):
                 # Set the article_html attribute with the first article's HTML content
                 self.article_html = result[0] if result else ""
+                # Generate the article title
+                soup = BeautifulSoup(self.article_html, 'html.parser')
+                self.article_title = generate_title(soup.get_text())  # Generate title using AI
                 # Schedule display_article_preview to be called on the main thread
                 self.root.after(0, lambda: self.display_article_preview(self.article_html))
             else:
@@ -169,7 +172,7 @@ class MainWindow:
         self.preview_window.geometry(f"{preview_width}x{preview_height}+{x}+{y}")
         
         # Add a HTMLLabel widget to display the article content
-        article_html_label = HTMLLabel(self.preview_window, html=article_html)
+        article_html_label = HTMLLabel(self.preview_window, html="<h1>" + self.article_title + "</h1>" + article_html)
         article_html_label.pack(fill='both', expand=True)  # Ensure HTMLLabel expands and fills the preview window
         
         # Add Approve and Disapprove buttons
@@ -195,8 +198,6 @@ class MainWindow:
     def handle_article_approval(self, approved, article_html):
         if approved:
             # If the user approves, schedule post_article_to_wordpress to be called on the main thread
-            soup = BeautifulSoup(article_html, 'html.parser')
-            self.article_title = generate_title(soup.get_text())  # Generate title using AI
             self.article_content = article_html
             self.root.after(0, self.post_article_to_wordpress)
         else:
