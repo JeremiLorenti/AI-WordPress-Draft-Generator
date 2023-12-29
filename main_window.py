@@ -178,8 +178,9 @@ class MainWindow:
         disapprove_button = ctk.CTkButton(self.preview_window, text="Disapprove", command=lambda: self.handle_article_approval(False, article_html))
         disapprove_button.pack(side='right', padx=(10, 50), pady=10)
         
-        # Bring the preview window to the front
+        # Bring the preview window to the front and keep it there
         self.preview_window.lift()
+        self.preview_window.attributes('-topmost', True)  # Keep the window on top
 
     def handle_article_approval(self, approved, article_html):
         if approved:
