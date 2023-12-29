@@ -39,11 +39,15 @@ async def select_relevant_categories(post_content):
 
     return relevant_category_ids
 
-async def on_submit(loading_label, num_articles, num_posts, progress_label, feedback=None):
+async def on_submit(loading_label, num_articles, num_posts, progress_label, feedback=None, preview_enabled=False):
     # Fetch the latest news articles
     latest_articles = fetch_latest_tech_news(num_articles=int(num_articles))
 
-    post_urls = []  # List to collect the URLs of the new draft posts
+    if preview_enabled:
+        post_contents = []  # List to collect the HTML content of the new draft posts
+    else:
+        post_urls = []  # List to collect the URLs of the new draft posts
+
     for article in latest_articles[:int(num_posts)]:
         try:
             # Scrape the content from the article link
@@ -65,16 +69,20 @@ async def on_submit(loading_label, num_articles, num_posts, progress_label, feed
 
             ai_generated_content = get_openai_response(ai_prompt)
 
-            # Construct post_data with title, AI-generated content, and excerpt
-            post_data = {
-                'title': article.title,
-                'content': ai_generated_content,
-                'excerpt': article.summary
-            }
+            if preview_enabled:
+                # Add the AI-generated content to the list
+                post_contents.append(ai_generated_content)
+            else:
+                # Construct post_data with title, AI-generated content, and excerpt
+                post_data = {
+                    'title': article.title,
+                    'content': ai_generated_content,
+                    'excerpt': article.summary
+                }
 
-            # Collect the URL of the new draft post
-            post_url = await create_draft_post(post_data)
-            post_urls.append(post_url)
+                # Collect the URL of the new draft post
+                post_url = await create_draft_post(post_data)
+                post_urls.append(post_url)
         except Exception as e:
             print(f"An error occurred: {str(e)}")
             raise e
@@ -82,8 +90,5 @@ async def on_submit(loading_label, num_articles, num_posts, progress_label, feed
     # Play success sound
     play_success_sound()
 
-    # Update the loading label
-    loading_label.configure(text="Drafts Successfully Created!")
-    
-    # Return the list of URLs of the new draft posts
-    return post_urls
+    # Return the list of HTML contents or URLs of the new draft posts
+    return post_contents if preview_enabled else post_urls

@@ -7,6 +7,9 @@ import webbrowser
 import time
 import asyncio
 from utils import load_settings  # Import load_settings from utils
+from wordpress_api import create_draft_post  # Import create_draft_post from wordpress_api
+from bs4 import BeautifulSoup  # Import BeautifulSoup for parsing HTML
+from openAI import generate_title  # Import generate_title from openAI
 
 def center_window(window, width, height):
     # Get the screen width and height
@@ -26,9 +29,11 @@ class MainWindow:
         self.root.tk_setPalette(background='dark gray')
         ctk.set_appearance_mode("Dark")
         ctk.set_default_color_theme("dark-blue")
-        self.root.geometry('400x400+50+50')  # Adjusted height from 350 to 400
-        self.create_widgets()
+        self.root.geometry('400x500+50+50')  # Adjusted height from 400 to 500
         self.settings = load_settings()  # Load settings when MainWindow is initialized
+        self.generated_url = ""  # Instance variable to store the generated URL
+        self.debug_mode = ctk.BooleanVar()  # Variable to store the state of the debug checkbox
+        self.create_widgets()
 
     def create_widgets(self):
         # Settings Button with Gear Icon
@@ -72,6 +77,14 @@ class MainWindow:
         self.spinner_label = ctk.CTkLabel(self.root, text="")
         self.spinner_label.pack(side='top', fill='x', expand=True)
 
+        # URL Display Label
+        self.url_label = ctk.CTkLabel(self.root, text="")
+        self.url_label.pack(side='top', fill='x', expand=True)
+
+        # Debug Mode Checkbox
+        debug_checkbox = ctk.CTkCheckBox(self.root, text="Debug Mode", variable=self.debug_mode)
+        debug_checkbox.pack(side='bottom', anchor='sw', padx=10, pady=10)
+
         # Instructional text label (moved to the bottom)
         instructions_label = ctk.CTkLabel(self.root, text="Please click the settings button in the top right corner to enter the required information before creating a new draft.", font=("Lato", 10), wraplength=400)
         instructions_label.pack(side='bottom', padx=10, pady=5)
@@ -103,11 +116,16 @@ class MainWindow:
         # Schedule the update_timer method to be called after 1 second and store the reference
         self.timer_job = self.root.after(1000, self.update_timer)
 
-    def on_submit_thread(self, spinner_label, num_articles, num_paragraphs, progress_label):
-        # Call the on_submit function and get the URL of the new draft post
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        result = loop.run_until_complete(on_submit(spinner_label, num_articles, num_paragraphs, progress_label))
+    def on_submit_thread(self, spinner_label, num_articles, num_paragraphs, progress_label, feedback=None):
+        # Check if debug mode is enabled
+        if self.debug_mode.get():
+            # If debug mode is enabled, use static predefined test articles
+            result = ["Test Article 1", "Test Article 2", "Test Article 3"]
+        else:
+            # If debug mode is not enabled, call the on_submit function and get the result
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            result = loop.run_until_complete(on_submit(spinner_label, num_articles, num_paragraphs, progress_label, feedback, preview_enabled=self.settings.get('ARTICLE_PREVIEW', False)))
         # Stop the timer by canceling the scheduled update_timer method
         if self.timer_job:
             self.root.after_cancel(self.timer_job)
@@ -116,45 +134,89 @@ class MainWindow:
             # Display the error message
             ctk.messagebox.showerror("Error", result)
         else:
-            # Update the spinner label to display the URL as a clickable link
-            for post_url in result:
-                spinner_label.configure(text=str(post_url), cursor="hand2")
-                spinner_label.bind("<Button-1>", lambda e: webbrowser.open_new(str(post_url)))
+            # Check if the article preview feature is enabled in the settings
+            if self.settings.get('ARTICLE_PREVIEW', False):
+                # Schedule display_article_preview to be called on the main thread
+                self.root.after(0, lambda article_html=self.article_html: self.display_article_preview(article_html))
+            else:
+                # If the article preview feature is not enabled, display the URLs as clickable links
+                for post_url in result:
+                    spinner_label.configure(text=str(post_url), cursor="hand2")
+                    spinner_label.bind("<Button-1>", lambda e: webbrowser.open_new(str(post_url)))
 
-    def display_article_preview(self, article_html):
-        # Create a new top-level window for the article preview
-        preview_window = ctk.CTkToplevel(self.root)
-        preview_window.title("Article Preview")
-        preview_window.geometry('600x400')  # Adjust the size as needed
+
+        def display_article_preview(self, article_html):
+            # Create a new preview window
+            self.preview_window = ctk.CTkToplevel(self.root)
+            self.preview_window.title("Article Preview")
+            
+            # Calculate the center coordinates
+            screen_width = self.root.winfo_screenwidth()
+            screen_height = self.root.winfo_screenheight()
+            x = (screen_width - 800) // 2
+            y = (screen_height - 600) // 2
+
+            # Set the preview window position
+            self.preview_window.geometry(f"800x600+{x}+{y}")
+
 
         # Add a Text widget to display the article content
-        article_textbox = ctk.CTkTextbox(preview_window, width=580, height=350)
+        article_textbox = ctk.CTkTextbox(self.preview_window, width=580, height=350)
         article_textbox.insert('end', article_html)
         article_textbox.pack(pady=(10, 10))
 
         # Add Approve and Disapprove buttons
-        approve_button = ctk.CTkButton(preview_window, text="Approve", command=lambda: self.handle_article_approval(True))
+        approve_button = ctk.CTkButton(self.preview_window, text="Approve", command=lambda: self.handle_article_approval(True, article_html))
         approve_button.pack(side='left', padx=(50, 10), pady=10)
 
-        disapprove_button = ctk.CTkButton(preview_window, text="Disapprove", command=lambda: self.handle_article_approval(False))
+        disapprove_button = ctk.CTkButton(self.preview_window, text="Disapprove", command=lambda: self.handle_article_approval(False, article_html))
         disapprove_button.pack(side='right', padx=(10, 50), pady=10)
 
         # Display the preview window
-        preview_window.mainloop()
+        self.preview_window.mainloop()
 
-    def handle_article_approval(self, approved):
+    def handle_article_approval(self, approved, article_html):
         if approved:
-            # If the user approves, proceed with posting the article as a draft
-            self.post_article_to_wordpress()
+            # If the user approves, schedule post_article_to_wordpress to be called on the main thread
+            soup = BeautifulSoup(article_html, 'html.parser')
+            self.article_title = generate_title(soup.get_text())  # Generate title using AI
+            self.article_content = article_html
+            self.root.after(0, self.post_article_to_wordpress)
         else:
-            # If the user disapproves, open a feedback window
-            self.collect_feedback()
+            # If the user disapproves, schedule collect_feedback to be called on the main thread
+            self.root.after(0, self.collect_feedback)
+
+    def post_article_to_wordpress(self):
+        # Assume that the article data is available as instance variables of the MainWindow class
+        post_data = {
+            'title': self.article_title,
+            'content': self.article_content,
+            'status': 'draft'
+        }
+        # Call the create_draft_post function from wordpress_api.py with the post data
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        self.generated_url = loop.run_until_complete(create_draft_post(post_data))
+        # Create Success message window using tkinter.messagebox
+        import tkinter.messagebox as msgbox
+
+        # Create a success message window using tkinter.messagebox
+        msgbox.showinfo("Success", "Article generation was successful!")
+
+        # After message is closed, close the preview window
+        self.preview_window.destroy()
+
+        # Update the URL label in the main window and make it clickable
+        self.url_label.configure(text=f"Generated URL: {self.generated_url}", cursor="hand2")
+        self.url_label.bind("<Button-1>", lambda e: webbrowser.open_new(self.generated_url))
 
     def collect_feedback(self):
         # Open a feedback window and collect feedback from the user
         feedback_window = ctk.CTkToplevel(self.root)
         feedback_window.title("Provide Feedback")
         feedback_window.geometry('400x200')  # Adjust the size as needed
+        # Center the new window in front of the preview window
+        center_window(feedback_window, 400, 200)
 
         # Add a Text widget to collect the feedback
         feedback_label = ctk.CTkLabel(feedback_window, text="Please provide feedback for the AI:", font=("Lato", 10))
@@ -172,9 +234,13 @@ class MainWindow:
     def submit_feedback(self):
         # Get the feedback from the feedback_entry widget
         feedback = self.feedback_entry.get()
+        # Close the feedback window
+        self.feedback_entry.master.destroy()
+        # Show a message indicating that the revised article generation is in progress
+        self.spinner_label.configure(text="Your feedback has been received. Generating a revised article...")
         # Call the on_submit function again with the feedback
         threading.Thread(target=self.on_submit_thread, args=(self.spinner_label, self.num_articles, 1, self.progress_label, feedback)).start()
 
     def show(self):
-        center_window(self.root, 600, 400)  # Adjusted height from 350 to 400
+        center_window(self.root, 600, 500)  # Adjusted height from 400 to 500
         self.root.mainloop()
