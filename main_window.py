@@ -136,44 +136,50 @@ class MainWindow:
         else:
             # Check if the article preview feature is enabled in the settings
             if self.settings.get('ARTICLE_PREVIEW', False):
+                # Set the article_html attribute with the first article's HTML content
+                self.article_html = result[0] if result else ""
                 # Schedule display_article_preview to be called on the main thread
-                self.root.after(0, lambda article_html=self.article_html: self.display_article_preview(article_html))
+                self.root.after(0, lambda: self.display_article_preview(self.article_html))
             else:
                 # If the article preview feature is not enabled, display the URLs as clickable links
                 for post_url in result:
                     spinner_label.configure(text=str(post_url), cursor="hand2")
                     spinner_label.bind("<Button-1>", lambda e: webbrowser.open_new(str(post_url)))
 
-
-        def display_article_preview(self, article_html):
-            # Create a new preview window
-            self.preview_window = ctk.CTkToplevel(self.root)
-            self.preview_window.title("Article Preview")
-            
-            # Calculate the center coordinates
-            screen_width = self.root.winfo_screenwidth()
-            screen_height = self.root.winfo_screenheight()
-            x = (screen_width - 800) // 2
-            y = (screen_height - 600) // 2
-
-            # Set the preview window position
-            self.preview_window.geometry(f"800x600+{x}+{y}")
-
-
+    def display_article_preview(self, article_html):
+        # Create a new preview window
+        self.preview_window = ctk.CTkToplevel(self.root)
+        self.preview_window.title("Article Preview")
+        
+        # Get the main window's position and size
+        main_x = self.root.winfo_x()
+        main_y = self.root.winfo_y()
+        main_width = self.root.winfo_width()
+        main_height = self.root.winfo_height()
+        
+        # Calculate the center position for the preview window
+        preview_width = 800
+        preview_height = 600
+        x = main_x + (main_width - preview_width) // 2
+        y = main_y + (main_height - preview_height) // 2
+        
+        # Set the preview window position and size
+        self.preview_window.geometry(f"{preview_width}x{preview_height}+{x}+{y}")
+        
         # Add a Text widget to display the article content
         article_textbox = ctk.CTkTextbox(self.preview_window, width=580, height=350)
         article_textbox.insert('end', article_html)
         article_textbox.pack(pady=(10, 10))
-
+        
         # Add Approve and Disapprove buttons
         approve_button = ctk.CTkButton(self.preview_window, text="Approve", command=lambda: self.handle_article_approval(True, article_html))
         approve_button.pack(side='left', padx=(50, 10), pady=10)
-
+        
         disapprove_button = ctk.CTkButton(self.preview_window, text="Disapprove", command=lambda: self.handle_article_approval(False, article_html))
         disapprove_button.pack(side='right', padx=(10, 50), pady=10)
-
-        # Display the preview window
-        self.preview_window.mainloop()
+        
+        # Bring the preview window to the front
+        self.preview_window.lift()
 
     def handle_article_approval(self, approved, article_html):
         if approved:
