@@ -4,3 +4,4 @@ feedparser==6.0.11
 openai==1.6.1
 requests==2.31.0
 tkhtmlview==0.2.0
+packaging==23.2
