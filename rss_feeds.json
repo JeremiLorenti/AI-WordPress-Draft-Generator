@@ -1,0 +1,24 @@
+{
+    "feeds": [
+        "https://techcrunch.com/feed",
+        "https://theverge.com/rss/frontpage",
+        "https://mashable.com/feeds/rss/all",
+        "https://wired.com/feed/rss",
+        "https://gizmodo.com/rss",
+        "https://cnet.com/rss/news",
+        "https://engadget.com/rss.xml",
+        "https://zdnet.com/news/rss.xml",
+        "https://feeds.feedburner.com/venturebeat/SZYF",
+        "https://readwrite.com/feed/?x=1",
+        "https://techtoday.co/feed",
+        "https://trusecai.com/feed",
+        "https://infogad.com/feed",
+        "https://gizmosforyou.com/feed",
+        "https://techmub.com/feed",
+        "https://ciente.io/feed",
+        "https://xavor.com/feed",
+        "https://technoclik.com/feed",
+        "https://technologyelevation.com/feed",
+        "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml"
+    ]
+}

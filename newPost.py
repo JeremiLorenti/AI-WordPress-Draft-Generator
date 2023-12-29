@@ -9,6 +9,7 @@ from news_fetcher import fetch_latest_tech_news
 import asyncio
 from tkhtmlview import HTMLLabel  # Import HTMLLabel from tkhtmlview to render HTML
 
+
 async def select_relevant_categories(post_content):
     # Retrieve all categories
     categories = await get_wordpress_categories()
@@ -40,9 +41,9 @@ async def select_relevant_categories(post_content):
 
     return relevant_category_ids
 
-async def on_submit(loading_label, num_articles, num_posts, progress_label, feedback=None, tones=None, preview_enabled=False, preview_window=None):
-    # Fetch the latest news articles
-    latest_articles = fetch_latest_tech_news(num_articles=int(num_articles))
+async def on_submit(loading_label, num_articles, num_posts, progress_label, feed_url, feedback=None, tones=None, preview_enabled=False, preview_window=None):
+    # Fetch the latest news articles using the RSS feed selected by the user
+    latest_articles = fetch_latest_tech_news(num_articles=int(num_articles), feed_url=feed_url)
 
     if preview_enabled:
         post_contents = []  # List to collect the HTML content of the new draft posts
@@ -61,7 +62,7 @@ async def on_submit(loading_label, num_articles, num_posts, progress_label, feed
                 "since the main title is handled separately. Use HTML tags for styling such as "
                 "<p> for paragraphs, <strong> for bold text, <em> for italics, "
                 "and <ul> or <ol> with <li> for lists. Do not include backticks (`), markdown formatting such as hashtags for headers or "
-                "asterisks for lists, or HTML document structure tags like <!DOCTYPE>, <html>, <head>, or <body>. Also do not include `html at the start or ` at the end. The output should be a properly formated article containing only the article content itself, free of formatting tags or encodings.\n"
+                "asterisks for lists, or HTML document structure tags like <!DOCTYPE>, <html>, <head>, or <body>. Also do not include `html at the start or ` at the end. The output should be a properly formated article containing only the article content itself, free of formatting tags or encodings.The new generated article should be plagerism free, with sources cited.\n"
             )
 
             # If feedback is provided, add it to the prompt

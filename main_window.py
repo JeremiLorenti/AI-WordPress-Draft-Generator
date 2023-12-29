@@ -6,6 +6,7 @@ import threading
 import webbrowser
 import time
 import asyncio
+import json
 from utils import load_settings  # Import load_settings from utils
 from wordpress_api import create_draft_post  # Import create_draft_post from wordpress_api
 from bs4 import BeautifulSoup  # Import BeautifulSoup for parsing HTML
@@ -70,6 +71,12 @@ class MainWindow:
         self.counter.insert(0, self.num_articles)
         self.counter.pack(side='left')
 
+        # RSS feed selection
+        with open('rss_feeds.json') as f:
+            rss_feed_options = json.load(f)['feeds']
+        self.rss_feed_dropdown = ctk.CTkComboBox(self.root, values=rss_feed_options)
+        self.rss_feed_dropdown.pack()
+
         # Tone selection checkboxes
         tones = ["Formal", "Friendly", "Professional", "Casual", "Enthusiastic", "Neutral"]
         self.tone_vars = {tone: ctk.BooleanVar() for tone in tones}
@@ -129,6 +136,7 @@ class MainWindow:
         self.timer_job = self.root.after(1000, self.update_timer)
 
     def on_submit_thread(self, spinner_label, num_articles, num_paragraphs, progress_label, feedback, tones, preview_enabled):
+        selected_rss_feed = self.rss_feed_dropdown.get()  # This gets the selected RSS feed from the dropdown
         # Check if debug mode is enabled
         if self.debug_mode.get():
             # If debug mode is enabled, use static predefined test articles
@@ -137,7 +145,7 @@ class MainWindow:
             # If debug mode is not enabled, call the on_submit function and get the result
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            result = loop.run_until_complete(on_submit(spinner_label, num_articles, num_paragraphs, progress_label, feedback, tones=tones, preview_enabled=preview_enabled))
+            result = loop.run_until_complete(on_submit(spinner_label, num_articles, num_paragraphs, progress_label, selected_rss_feed, feedback, tones=tones, preview_enabled=preview_enabled))
         # Stop the timer by canceling the scheduled update_timer method
         if self.timer_job:
             self.root.after_cancel(self.timer_job)
