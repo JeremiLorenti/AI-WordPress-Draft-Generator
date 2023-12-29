@@ -1,15 +1,16 @@
 # AI Draft Post Creator
 
-## *VERY MUCH A WORK IN PROGRESS*
-
-AI Draft Post Creator is a desktop application designed to streamline the process of creating draft posts for your WordPress blog using the power of AI. The application provides a user-friendly interface to generate draft posts based on the number of articles and paragraphs specified by the user.
+AI Draft Post Creator is a desktop application designed to streamline the process of creating draft posts for your WordPress blog using the power of AI. The application provides a user-friendly interface to generate draft posts based on the number of articles specified by the user.
 
 ## Features
 
 - **Generate Draft Posts**: Easily create draft posts for your WordPress blog with AI assistance.
+- **Tone Selection**: Choose the tone of the AI-generated content to match your blog's style.
 - **WordPress Integration**: Directly connect to your WordPress site to manage categories and create drafts.
+- **Article Preview**: Preview the AI-generated content and provide feedback for revisions.
 - **Customizable Settings**: Configure your OpenAI and WordPress settings through a dedicated settings window.
 - **User-Friendly Interface**: Simple and intuitive interface for seamless operation.
+- **Debug Mode**: Test the application using predefined test articles.
 
 ## Installation
 
@@ -26,7 +27,8 @@ Upon launching AI Draft Post Creator, you will be greeted with the main window w
 
 - Access the settings window to enter your OpenAI API key and WordPress credentials.
 - Specify the number of articles you wish to generate.
-- Click the "Create New Draft" button to initiate the draft post creation process.
+- Select the desired tone for the AI-generated content.
+- Click the "Create New Draft" button to initiate the draft post creation process with the option to preview and provide feedback.
 
 The application will then communicate with the OpenAI API to generate content and create a draft post on your WordPress site.
 
