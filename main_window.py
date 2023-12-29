@@ -240,18 +240,26 @@ class MainWindow:
         self.feedback_entry.pack(pady=(0, 10))
 
         # Add a Submit button to submit the feedback
-        submit_button = ctk.CTkButton(feedback_window, text="Submit Feedback", command=self.submit_feedback, font=("Lato", 10))
+        submit_button = ctk.CTkButton(feedback_window, text="Submit Feedback", command=lambda: self.submit_feedback(feedback_window), font=("Lato", 10))
         submit_button.pack(pady=10)
 
         # Bring the feedback window to the front and keep it there
         feedback_window.lift()
         feedback_window.attributes('-topmost', True)  # Keep the window on top
 
-    def submit_feedback(self):
+        # Set the feedback window to not be topmost when it is closed
+        feedback_window.protocol("WM_DELETE_WINDOW", lambda: self.on_feedback_window_close(feedback_window))
+
+    def on_feedback_window_close(self, feedback_window):
+        # Revert the feedback window to its normal state (not topmost)
+        feedback_window.attributes('-topmost', False)
+        feedback_window.destroy()
+
+    def submit_feedback(self, feedback_window):
         # Get the feedback from the feedback_entry widget
         feedback = self.feedback_entry.get()
         # Close the feedback window
-        self.feedback_entry.master.destroy()
+        self.on_feedback_window_close(feedback_window)
         # Show a message indicating that the revised article generation is in progress
         self.spinner_label.configure(text="Your feedback has been received. Generating a revised article...")
         # Call the on_submit function again with the feedback
