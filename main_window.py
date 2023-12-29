@@ -243,12 +243,11 @@ class MainWindow:
         submit_button = ctk.CTkButton(feedback_window, text="Submit Feedback", command=lambda: self.submit_feedback(feedback_window), font=("Lato", 10))
         submit_button.pack(pady=10)
 
-        # Bring the feedback window to the front and keep it there
-        feedback_window.lift()
-        feedback_window.attributes('-topmost', True)  # Keep the window on top
-
         # Set the feedback window to not be topmost when it is closed
         feedback_window.protocol("WM_DELETE_WINDOW", lambda: self.on_feedback_window_close(feedback_window))
+
+        # Delay setting the feedback window as topmost to ensure it stays on top
+        self.root.after(100, lambda: feedback_window.attributes('-topmost', True))
 
     def on_feedback_window_close(self, feedback_window):
         # Revert the feedback window to its normal state (not topmost)
