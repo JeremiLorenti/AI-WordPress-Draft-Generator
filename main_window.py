@@ -26,7 +26,7 @@ def center_window(window, width, height):
 class MainWindow:
     def __init__(self):
         self.root = ctk.CTk()
-        self.root.title("AI Draft Post Creator")
+        self.root.title("AI WordPress Draft Generator")
         self.root.configure(bg="dark gray")
         self.root.tk_setPalette(background='dark gray')
         ctk.set_appearance_mode("Dark")
@@ -46,7 +46,7 @@ class MainWindow:
         settings_button.pack(side='top', anchor='ne', padx=10, pady=10)
 
         # Welcome label (moved to the top)
-        welcome_label = ctk.CTkLabel(self.root, text="Welcome to AI Draft Post Creator", font=('Lato', 20, 'bold'))
+        welcome_label = ctk.CTkLabel(self.root, text="Welcome to your Personal WordPress Draft Generator!", font=('Lato', 20, 'bold'))
         welcome_label.pack(side='top', pady=20)
 
         # Divider after welcome label
