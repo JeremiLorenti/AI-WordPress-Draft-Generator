@@ -243,8 +243,9 @@ class MainWindow:
         submit_button = ctk.CTkButton(feedback_window, text="Submit Feedback", command=self.submit_feedback, font=("Lato", 10))
         submit_button.pack(pady=10)
 
-        # Display the feedback window
-        feedback_window.mainloop()
+        # Bring the feedback window to the front and keep it there
+        feedback_window.lift()
+        feedback_window.attributes('-topmost', True)  # Keep the window on top
 
     def submit_feedback(self):
         # Get the feedback from the feedback_entry widget
