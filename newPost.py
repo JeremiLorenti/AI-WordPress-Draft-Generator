@@ -40,7 +40,7 @@ async def select_relevant_categories(post_content):
 
     return relevant_category_ids
 
-async def on_submit(loading_label, num_articles, num_posts, progress_label, feedback=None, preview_enabled=False, preview_window=None):
+async def on_submit(loading_label, num_articles, num_posts, progress_label, feedback=None, tones=None, preview_enabled=False, preview_window=None):
     # Fetch the latest news articles
     latest_articles = fetch_latest_tech_news(num_articles=int(num_articles))
 
@@ -67,6 +67,10 @@ async def on_submit(loading_label, num_articles, num_posts, progress_label, feed
             # If feedback is provided, add it to the prompt
             if feedback:
                 ai_prompt += f"\nFeedback: {feedback}\nPlease revise the content based on the feedback above."
+
+            # If tones are provided, add them to the prompt
+            if tones:
+                ai_prompt += f"\nTones: {tones}\nPlease incorporate these tones into the content."
 
             ai_generated_content = get_openai_response(ai_prompt)
 

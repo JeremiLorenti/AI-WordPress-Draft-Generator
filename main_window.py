@@ -11,6 +11,7 @@ from wordpress_api import create_draft_post  # Import create_draft_post from wor
 from bs4 import BeautifulSoup  # Import BeautifulSoup for parsing HTML
 from openAI import generate_title  # Import generate_title from openAI
 from tkhtmlview import HTMLLabel  # Import HTMLLabel from tkhtmlview
+import tkinter as tk  # Import tkinter for Listbox widget
 
 def center_window(window, width, height):
     # Get the screen width and height
@@ -69,6 +70,13 @@ class MainWindow:
         self.counter.insert(0, self.num_articles)
         self.counter.pack(side='left')
 
+        # Tone selection checkboxes
+        tones = ["Formal", "Friendly", "Professional", "Casual", "Enthusiastic", "Neutral"]
+        self.tone_vars = {tone: ctk.BooleanVar() for tone in tones}
+        for tone, var in self.tone_vars.items():
+            checkbox = ctk.CTkCheckBox(self.root, text=tone, variable=var)
+            checkbox.pack()
+
         create_button = ctk.CTkButton(self.root, text="Create New Draft", command=self.create_new_draft, font=("Lato", 10))
         create_button.pack(pady=10)
 
@@ -104,8 +112,10 @@ class MainWindow:
             self.spinner_label.configure(text="Loading... 0 seconds")
             # Start the update_timer method and store the reference
             self.timer_job = self.root.after(1000, self.update_timer)
+            # Get selected tones from checkboxes
+            selected_tones = [tone for tone, var in self.tone_vars.items() if var.get()]
             # Call the on_submit function with the number of articles in a separate thread
-            threading.Thread(target=self.on_submit_thread, args=(self.spinner_label, num_articles, 1, self.progress_label)).start()
+            threading.Thread(target=self.on_submit_thread, args=(self.spinner_label, num_articles, 1, self.progress_label, None), kwargs={'tones': selected_tones, 'preview_enabled': self.settings.get('ARTICLE_PREVIEW', False)}).start()
         else:
             # Show an error message if the input is not a positive integer
             ctk.messagebox.showerror("Error", "Please enter a valid number of articles.")
@@ -118,7 +128,7 @@ class MainWindow:
         # Schedule the update_timer method to be called after 1 second and store the reference
         self.timer_job = self.root.after(1000, self.update_timer)
 
-    def on_submit_thread(self, spinner_label, num_articles, num_paragraphs, progress_label, feedback=None):
+    def on_submit_thread(self, spinner_label, num_articles, num_paragraphs, progress_label, feedback, tones, preview_enabled):
         # Check if debug mode is enabled
         if self.debug_mode.get():
             # If debug mode is enabled, use static predefined test articles
@@ -127,7 +137,7 @@ class MainWindow:
             # If debug mode is not enabled, call the on_submit function and get the result
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            result = loop.run_until_complete(on_submit(spinner_label, num_articles, num_paragraphs, progress_label, feedback, preview_enabled=self.settings.get('ARTICLE_PREVIEW', False)))
+            result = loop.run_until_complete(on_submit(spinner_label, num_articles, num_paragraphs, progress_label, feedback, tones=tones, preview_enabled=preview_enabled))
         # Stop the timer by canceling the scheduled update_timer method
         if self.timer_job:
             self.root.after_cancel(self.timer_job)
@@ -273,7 +283,7 @@ class MainWindow:
         # Show a message indicating that the revised article generation is in progress
         self.spinner_label.configure(text="Your feedback has been received. Generating a revised article...")
         # Call the on_submit function again with the feedback
-        threading.Thread(target=self.on_submit_thread, args=(self.spinner_label, self.num_articles, 1, self.progress_label, feedback)).start()
+        threading.Thread(target=self.on_submit_thread, args=(self.spinner_label, self.num_articles, 1, self.progress_label, feedback), kwargs={'tones': self.tone_vars, 'preview_enabled': self.settings.get('ARTICLE_PREVIEW', False)}).start()
 
     def show(self):
         center_window(self.root, 600, 500)  # Adjusted height from 400 to 500
