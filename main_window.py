@@ -170,7 +170,7 @@ class MainWindow:
         
         # Add a HTMLLabel widget to display the article content
         article_html_label = HTMLLabel(self.preview_window, html=article_html)
-        article_html_label.pack(pady=(10, 10))
+        article_html_label.pack(fill='both', expand=True)  # Ensure HTMLLabel expands and fills the preview window
         
         # Add Approve and Disapprove buttons
         approve_button = ctk.CTkButton(self.preview_window, text="Approve", command=lambda: self.handle_article_approval(True, article_html))
