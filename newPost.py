@@ -7,6 +7,7 @@ from wordpress_api import get_wordpress_categories, create_draft_post
 from utils import play_success_sound, scrape_content_from_url  # Import the new function to scrape content
 from news_fetcher import fetch_latest_tech_news
 import asyncio
+from tkhtmlview import HTMLLabel  # Import HTMLLabel from tkhtmlview to render HTML
 
 async def select_relevant_categories(post_content):
     # Retrieve all categories
@@ -39,7 +40,7 @@ async def select_relevant_categories(post_content):
 
     return relevant_category_ids
 
-async def on_submit(loading_label, num_articles, num_posts, progress_label, feedback=None, preview_enabled=False):
+async def on_submit(loading_label, num_articles, num_posts, progress_label, feedback=None, preview_enabled=False, preview_window=None):
     # Fetch the latest news articles
     latest_articles = fetch_latest_tech_news(num_articles=int(num_articles))
 
@@ -72,6 +73,13 @@ async def on_submit(loading_label, num_articles, num_posts, progress_label, feed
             if preview_enabled:
                 # Add the AI-generated content to the list
                 post_contents.append(ai_generated_content)
+                if preview_window is not None and ai_generated_content:
+                    # Create an HTMLLabel to render the HTML content
+                    html_label = HTMLLabel(preview_window, html=ai_generated_content)  # Ensure this is the correct parent
+                    html_label.pack(expand=True, fill='both')  # Make sure the HTMLLabel fills the preview window
+                    preview_window.attributes('-topmost', True)  # Keep the window on top
+                    preview_window.focus_force()  # Force focus on the preview window
+                    preview_window.update()  # Update the preview window to reflect changes
             else:
                 # Construct post_data with title, AI-generated content, and excerpt
                 post_data = {

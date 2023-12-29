@@ -10,6 +10,7 @@ from utils import load_settings  # Import load_settings from utils
 from wordpress_api import create_draft_post  # Import create_draft_post from wordpress_api
 from bs4 import BeautifulSoup  # Import BeautifulSoup for parsing HTML
 from openAI import generate_title  # Import generate_title from openAI
+from tkhtmlview import HTMLLabel  # Import HTMLLabel from tkhtmlview
 
 def center_window(window, width, height):
     # Get the screen width and height
@@ -33,6 +34,7 @@ class MainWindow:
         self.settings = load_settings()  # Load settings when MainWindow is initialized
         self.generated_url = ""  # Instance variable to store the generated URL
         self.debug_mode = ctk.BooleanVar()  # Variable to store the state of the debug checkbox
+        self.preview_window = None  # Initialize the preview_window attribute
         self.create_widgets()
 
     def create_widgets(self):
@@ -166,10 +168,9 @@ class MainWindow:
         # Set the preview window position and size
         self.preview_window.geometry(f"{preview_width}x{preview_height}+{x}+{y}")
         
-        # Add a Text widget to display the article content
-        article_textbox = ctk.CTkTextbox(self.preview_window, width=580, height=350)
-        article_textbox.insert('end', article_html)
-        article_textbox.pack(pady=(10, 10))
+        # Add a HTMLLabel widget to display the article content
+        article_html_label = HTMLLabel(self.preview_window, html=article_html)
+        article_html_label.pack(pady=(10, 10))
         
         # Add Approve and Disapprove buttons
         approve_button = ctk.CTkButton(self.preview_window, text="Approve", command=lambda: self.handle_article_approval(True, article_html))
@@ -177,10 +178,19 @@ class MainWindow:
         
         disapprove_button = ctk.CTkButton(self.preview_window, text="Disapprove", command=lambda: self.handle_article_approval(False, article_html))
         disapprove_button.pack(side='right', padx=(10, 50), pady=10)
+
+        # Add Cancel button
+        cancel_button = ctk.CTkButton(self.preview_window, text="Cancel", command=self.preview_window.destroy)
+        cancel_button.pack(side='right', padx=(50, 10), pady=10)
         
         # Bring the preview window to the front and keep it there
-        self.preview_window.lift()
-        self.preview_window.attributes('-topmost', True)  # Keep the window on top
+        if self.preview_window is not None:
+            self.preview_window.lift()
+            self.preview_window.attributes('-topmost', True)  # Keep the window on top
+            self.preview_window.focus_force()  # Add this line to force focus on the preview window
+            self.preview_window.update()  # Add this line to ensure the preview window is updated before proceeding
+        else:
+            raise Exception("Preview window is not created.")
 
     def handle_article_approval(self, approved, article_html):
         if approved:

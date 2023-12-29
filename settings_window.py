@@ -44,9 +44,7 @@ class SettingsWindow:
         self.wordpress_password_entry.pack(pady=(0, 10))
 
         # Article Preview Feature Checkbox
-        article_preview_label = ctk.CTkLabel(self.settings_root, text="Enable article preview and feedback:", font=("Lato", 10))
-        article_preview_label.pack(pady=(10, 0))
-        self.article_preview_checkbox = ctk.CTkCheckBox(self.settings_root)
+        self.article_preview_checkbox = ctk.CTkCheckBox(self.settings_root, text="Enable article preview and feedback", font=("Lato", 10))
         self.article_preview_checkbox.pack(pady=(0, 10))
 
         # Load existing settings and populate the fields

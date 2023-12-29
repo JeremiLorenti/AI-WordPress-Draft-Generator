@@ -40,7 +40,7 @@ def get_openai_response(prompt, is_title=False):
     # Define a dictionary for the user prompt that contains the actual content to be processed by the AI.
     user_prompt = {
         "role": "user",  # The role is set to 'user' to indicate that this is the input for the AI.
-        "content": prompt[:100],  # The actual content or question that the AI needs to respond to. Truncate the prompt to the first 100 characters for testing and development.
+        "content": prompt,  # The actual content or question that the AI needs to respond to.
     }
 
     # Send the message to the OpenAI API with the system prompt followed by the user prompt.
@@ -50,8 +50,7 @@ def get_openai_response(prompt, is_title=False):
     )
 
     # Return the content of the response from the AI, which is the generated title or content.
-    # Truncate the AI response to the first 250 characters for testing and development.
-    return chat_completion.choices[0].message.content[:250]
+    return chat_completion.choices[0].message.content
 
 # Define a function named generate_title that takes a content and generates a title.
 def generate_title(content):
