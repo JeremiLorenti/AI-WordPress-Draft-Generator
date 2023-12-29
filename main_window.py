@@ -204,11 +204,19 @@ class MainWindow:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         self.generated_url = loop.run_until_complete(create_draft_post(post_data))
+        
+        # Temporarily set the main window as topmost before showing the message box
+        self.root.attributes('-topmost', True)
+        self.root.update()
+        
         # Create Success message window using tkinter.messagebox
         import tkinter.messagebox as msgbox
-
+        
         # Create a success message window using tkinter.messagebox
         msgbox.showinfo("Success", "Article generation was successful!")
+        
+        # Revert the main window to its normal state (not topmost)
+        self.root.attributes('-topmost', False)
 
         # After message is closed, close the preview window
         self.preview_window.destroy()
