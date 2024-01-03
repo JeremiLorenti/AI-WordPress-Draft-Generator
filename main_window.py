@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup  # Import BeautifulSoup for parsing HTML
 from openAI import generate_title  # Import generate_title from openAI
 from tkhtmlview import HTMLLabel  # Import HTMLLabel from tkhtmlview
 import tkinter as tk  # Import tkinter for Listbox widget
+from wordpress_api import get_draft_posts, delete_draft_post  # Import get_draft_posts and delete_draft_post from wordpress_api
 
 def center_window(window, width, height):
     # Get the screen width and height
@@ -36,6 +37,7 @@ class MainWindow:
         self.generated_url = ""  # Instance variable to store the generated URL
         self.debug_mode = ctk.BooleanVar()  # Variable to store the state of the debug checkbox
         self.preview_window = None  # Initialize the preview_window attribute
+        self.root.after(0, lambda: asyncio.run(self.list_draft_posts()))
         self.create_widgets()
 
     def create_widgets(self):
@@ -91,6 +93,18 @@ class MainWindow:
         create_button = ctk.CTkButton(self.root, text="Create New Draft", command=self.create_new_draft, font=("Lato", 10))
         create_button.pack(pady=10)
 
+                # Add a button to list draft posts
+        self.list_drafts_button = ctk.CTkButton(self.root, text="List Draft Posts", command=lambda: asyncio.run(self.list_draft_posts()))
+        self.list_drafts_button.pack(pady=10)
+
+        # Add a Listbox to display draft posts
+        self.draft_posts_list = tk.Listbox(self.root)
+        self.draft_posts_list.pack(pady=10)
+
+        # Add a button to delete the selected draft post
+        self.delete_draft_button = ctk.CTkButton(self.root, text="Delete Selected Draft", command=lambda: asyncio.run(self.delete_selected_draft_post()))
+        self.delete_draft_button.pack(pady=10)
+
         # Progress Indicator Label
         self.progress_label = ctk.CTkLabel(self.root, text="")
         self.progress_label.pack(side='top', fill='x', expand=True)
@@ -109,6 +123,24 @@ class MainWindow:
         # Instructional text label (moved to the bottom)
         instructions_label = ctk.CTkLabel(self.root, text="Please click the settings button in the top right corner to enter the required information before creating a new draft.", font=("Lato", 10), wraplength=760)
         instructions_label.pack(side='bottom', padx=10, pady=5)
+
+    async def list_draft_posts(self):
+        draft_posts = await get_draft_posts()
+        if 'error' not in draft_posts:
+            self.draft_posts_list.delete(0, tk.END)  # Clear the current list
+            for post in draft_posts:
+                self.draft_posts_list.insert(tk.END, f"{post['id']} - {post['title']['rendered']}")
+        else:
+            print(draft_posts['error'])
+    async def delete_selected_draft_post(self):
+        selection = self.draft_posts_list.curselection()
+        if selection:
+            post_id = self.draft_posts_list.get(selection[0]).split(' - ')[0]
+            result = await delete_draft_post(post_id)
+            if 'success' in result:
+                self.list_draft_posts()  # Refresh the list after deletion
+            else:
+                print(result['error'])
 
     def open_settings_window(self):
         settings_window = SettingsWindow()
@@ -512,6 +544,11 @@ class MainWindow:
         self.spinner_label.configure(text="Your feedback has been received. Generating a revised article...")
         # Call the on_submit function again with the feedback
         threading.Thread(target=self.on_submit_thread, args=(self.spinner_label, self.num_articles, 1, self.progress_label, feedback), kwargs={'tones': self.tone_vars, 'preview_enabled': self.settings.get('ARTICLE_PREVIEW', False)}).start()
+
+
+
+
+
 
     def show(self):
         center_window(self.root, 800, 700)  # Adjusted width from 600 to 800 and height from 600 to 700
