@@ -9,7 +9,7 @@ import json
 def get_wordpress_credentials():
     with open('settings.json') as f:
         settings = json.load(f)
-    return settings['wordpress']['username'], settings['wordpress']['password']
+    return settings['WORDPRESS_USERNAME'], settings['WORDPRESS_PASSWORD']
 
 # Get WordPress URL from settings.json
 def get_wordpress_url():
